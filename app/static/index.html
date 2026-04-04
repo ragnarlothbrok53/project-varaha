@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Varaha Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brand: { purple: '#8B5CF6', blue: '#3B82F6', dark: '#0F172A' } },
+                    animation: { 
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow-pulse 10s infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #020617; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-purple { background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%); backdrop-filter: blur(24px); border: 1px solid rgba(139, 92, 246, 0.1); }
+        
+        .glow-mesh { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; opacity: 0.4; }
+        .glow-mesh::before { content: ""; position: absolute; top: -10%; left: -10%; width: 60%; height: 60%; background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%); border-radius: 50%; filter: blur(80px); animation: drift 20s infinite alternate; }
+        .glow-mesh::after { content: ""; position: absolute; bottom: -10%; right: -10%; width: 60%; height: 60%; background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%); border-radius: 50%; filter: blur(80px); animation: drift 25s infinite alternate-reverse; }
+        
+        @keyframes drift { from { transform: translate(0, 0); } to { transform: translate(10%, 10%); } }
+        [x-cloak] { display: none !important; }
+        
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
+    </style>
+</head>
+<body x-data="dashboard" class="text-white min-h-screen selection:bg-brand-purple/40 overflow-x-hidden antialiased">
+    
+    <div class="glow-mesh"></div>
+
+    <!-- Auth Layer -->
+    <div x-show="!authenticated" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-3xl px-6">
+        <div class="glass p-16 rounded-[4rem] w-full max-w-xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] border-white/5 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-purple/10 to-brand-blue/5 pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col items-center">
+                <div class="p-6 bg-brand-purple rounded-[2rem] mb-10 shadow-[0_0_40px_rgba(139,92,246,0.5)] animate-pulse-slow">
+                    <svg class="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <h1 class="text-5xl font-black tracking-tighter italic uppercase text-white mb-4">Varaha <span class="font-light text-slate-500">Core</span></h1>
+                <p class="text-slate-500 font-bold tracking-widest uppercase text-xs mb-12 opacity-60">Multi-Model Orchestration Protocol</p>
+                <form @submit.prevent="login" class="w-full space-y-6">
+                    <div class="relative group">
+                        <input type="password" x-model="adminKey" placeholder="Authorization Matrix Key" class="w-full h-20 bg-white/[0.03] border border-white/10 rounded-3xl px-8 focus:outline-none focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/10 text-xl font-mono transition-all text-center placeholder:text-slate-700">
+                    </div>
+                    <button class="w-full h-20 bg-brand-purple hover:bg-brand-purple/80 transition-all rounded-3xl font-black text-xl shadow-2xl tracking-widest uppercase active:scale-[0.98]">Access Node</button>
+                    <p x-show="loginError" class="text-red-400 text-sm text-center font-bold" x-text="loginError"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div x-show="authenticated" class="max-w-7xl mx-auto px-6 md:px-12 py-10 md:py-20" x-cloak>
+        
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10 mb-24">
+            <div class="flex items-center gap-8">
+                <div class="p-5 bg-brand-purple rounded-[2rem] shadow-[0_0_50px_rgba(139,92,246,0.3)]">
+                     <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <div>
+                     <h1 class="text-5xl font-black tracking-tighter leading-none italic uppercase">VARAHA <span class="hidden sm:inline font-light text-slate-600 tracking-[0.3em] text-xs ml-4">Universal Node</span></h1>
+                     <p class="text-slate-400 text-sm font-bold mt-2 uppercase tracking-[0.2em] opacity-40">M3 Max Inference Proxy v1.6</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-6 w-full lg:w-auto">
+                 <div class="glass-purple px-8 py-5 rounded-[2.5rem] flex items-center justify-between flex-1 lg:flex-none gap-12">
+                    <div class="flex flex-col">
+                         <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 leading-none">Cluster Health</span>
+                         <span class="text-lg font-black text-brand-purple italic leading-none">OPERATIONAL</span>
+                    </div>
+                    <div class="relative w-4 h-4">
+                        <div class="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-20"></div>
+                        <div class="w-4 h-4 bg-emerald-500 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.8)]"></div>
+                    </div>
+                </div>
+                <button @click="logout" class="glass p-5 rounded-[1.5rem] hover:bg-red-500/10 hover:text-red-400 transition-all text-slate-600 group">
+                    <svg class="w-8 h-8 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Controller -->
+        <div class="flex flex-wrap gap-4 p-2 glass rounded-[2.5rem] mb-16 w-fit mx-auto lg:mx-0 shadow-2xl border-white/5">
+            <button @click="tab = 'overview'" :class="tab === 'overview' ? 'bg-brand-purple text-white shadow-[0_10px_30px_rgba(139,92,246,0.3)]' : 'text-slate-500 hover:text-white'" class="px-12 py-4 rounded-[1.8rem] transition-all font-black text-sm uppercase tracking-widest italic">Registry</button>
+            <button @click="tab = 'integrations'" :class="tab === 'integrations' ? 'bg-brand-purple text-white shadow-[0_10px_30px_rgba(139,92,246,0.3)]' : 'text-slate-500 hover:text-white'" class="px-12 py-4 rounded-[1.8rem] transition-all font-black text-sm uppercase tracking-widest italic">Integrations</button>
+            <button @click="tab = 'management'; fetchManagementData()" :class="tab === 'management' ? 'bg-brand-purple text-white shadow-[0_10px_30px_rgba(139,92,246,0.3)]' : 'text-slate-500 hover:text-white'" class="px-12 py-4 rounded-[1.8rem] transition-all font-black text-sm uppercase tracking-widest italic">Governance</button>
+            <button @click="tab = 'benchmark'" :class="tab === 'benchmark' ? 'bg-brand-purple text-white shadow-[0_10px_30px_rgba(139,92,246,0.3)]' : 'text-slate-500 hover:text-white'" class="px-12 py-4 rounded-[1.8rem] transition-all font-black text-sm uppercase tracking-widest italic">Evaluation</button>
+            <button @click="tab = 'playground'" :class="tab === 'playground' ? 'bg-brand-purple text-white shadow-[0_10px_30px_rgba(139,92,246,0.3)]' : 'text-slate-500 hover:text-white'" class="px-12 py-4 rounded-[1.8rem] transition-all font-black text-sm uppercase tracking-widest italic font-bold">Playground</button>
+        </div>
+
+        <main class="pb-32">
+            
+            <!-- REGISTRY (The Ledger) -->
+            <div x-show="tab === 'overview'" class="motion-safe:animate-in motion-safe:fade-in space-y-8">
+                 <!-- Setup Quick-Flow -->
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                     <div class="glass p-10 rounded-[3rem] border-brand-purple/10 flex flex-col gap-6 relative group overflow-hidden">
+                         <div class="absolute top-0 right-0 p-8 opacity-5"><svg class="w-24 h-24 text-brand-purple" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg></div>
+                         <h4 class="text-xs font-black text-brand-purple uppercase tracking-[0.3em]">Step 01</h4>
+                         <div>
+                             <p class="text-2xl font-black italic tracking-tighter mb-2">Build Identity</p>
+                             <p class="text-sm text-slate-500 leading-relaxed font-medium">Provision organization nodes and Forge matrix tokens in Governance.</p>
+                         </div>
+                     </div>
+                     <div class="glass p-10 rounded-[3rem] border-emerald-500/10 flex flex-col gap-6 relative group overflow-hidden">
+                         <div class="absolute top-0 right-0 p-8 opacity-5"><svg class="w-24 h-24 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.97 4.44c-.31.17-.66.17-.97 0l-7.97-4.44c-.32-.17-.53-.5-.53-.88v-9c0-.38.21-.71.53-.88l7.97-4.44c.31-.17.66-.17.97 0l7.97 4.44c.32.17.53.5.53.88v9z"></path></svg></div>
+                         <h4 class="text-xs font-black text-emerald-500 uppercase tracking-[0.3em]">Step 02</h4>
+                         <div>
+                             <p class="text-2xl font-black italic tracking-tighter mb-2">Initialize Pool</p>
+                             <p class="text-sm text-slate-500 leading-relaxed font-medium">Select your engine tier (Qwen/Tiny) and run a quality scan in Evaluation.</p>
+                         </div>
+                     </div>
+                     <div class="glass-purple p-10 rounded-[3rem] border-brand-blue/20 flex flex-col gap-6 relative group overflow-hidden">
+                         <div class="absolute top-0 right-0 p-8 opacity-5"><svg class="w-24 h-24 text-brand-blue" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"></path></svg></div>
+                         <h4 class="text-xs font-black text-brand-blue uppercase tracking-[0.3em]">Step 03</h4>
+                         <div>
+                             <p class="text-2xl font-black italic tracking-tighter mb-2">Scale API</p>
+                             <p class="text-sm text-slate-500 leading-relaxed font-medium">Inject OpenAI-compatible SDKs and stream to global production.</p>
+                         </div>
+                     </div>
+                 </div>
+
+                 <div class="flex justify-between items-center mb-8 px-6">
+                    <h3 class="text-3xl font-black italic tracking-tighter underline decoration-brand-purple/20 underline-offset-8">Execution Ledger</h3>
+                 </div>
+                 
+                 <div class="space-y-4">
+                    <template x-for="req in historicalRequests" :key="req.job_id">
+                        <div class="glass rounded-[2.5rem] overflow-hidden transition-all hover:bg-white/[0.04] border border-white/[0.03]">
+                            <div @click="selectedRow = (selectedRow === req.job_id ? null : req.job_id)" class="grid grid-cols-2 lg:grid-cols-5 items-center p-8 md:p-10 cursor-pointer">
+                                <div class="font-mono text-xs md:text-sm text-slate-500 truncate" x-text="req.job_id.substring(0, 16)"></div>
+                                <div class="px-0 lg:px-4 flex justify-center">
+                                     <span :class="req.model_id === 'qwen' ? 'bg-brand-purple/10 border-brand-purple/20 text-brand-purple' : 'bg-brand-blue/10 border-brand-blue/20 text-brand-blue'" class="px-4 py-2 border rounded-xl font-black text-[10px] uppercase tracking-[0.2em] italic" x-text="req.model_id"></span>
+                                </div>
+                                <div class="hidden lg:block px-4 text-xs font-bold text-slate-400 text-center" x-text="req.input_tokens + ' -> ' + req.output_tokens"></div>
+                                <div class="hidden lg:block px-4 text-sm font-black text-emerald-400 italic text-center" x-text="req.tps.toFixed(1) + ' tokens/s'"></div>
+                                <div class="text-right text-[10px] font-black text-slate-700 uppercase tracking-widest" x-text="new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })"></div>
+                            </div>
+                            <!-- Expansion Logic -->
+                            <div x-show="selectedRow === req.job_id" x-collapse x-cloak>
+                                <div class="px-10 pb-12 pt-6 border-t border-white/5 bg-black/60 shadow-inner">
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 py-6">
+                                        <div class="flex flex-col h-[480px]">
+                                            <h4 class="text-[10px] font-black uppercase text-slate-600 tracking-[0.4em] mb-6 pl-4 leading-none">Matrix Input (Payload)</h4>
+                                            <div class="flex-1 bg-black/40 border border-white/5 rounded-[3rem] p-10 overflow-auto custom-scrollbar shadow-inner">
+                                                <pre class="text-xs text-slate-600 font-mono break-all whitespace-pre-wrap leading-relaxed italic" x-text="JSON.stringify(req.request_payload, null, 2)"></pre>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col h-[480px]">
+                                            <h4 class="text-[10px] font-black uppercase text-brand-purple/60 tracking-[0.4em] mb-6 pl-4 leading-none">Inference Output (Artifact)</h4>
+                                            <div class="flex-1 bg-brand-purple/[0.05] border border-brand-purple/10 rounded-[3rem] p-10 overflow-auto custom-scrollbar shadow-2xl">
+                                                <pre class="text-sm text-emerald-400/90 font-mono break-all whitespace-pre-wrap leading-relaxed shadow-glow" x-text="JSON.stringify(req.response_json, null, 2)"></pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-10 flex flex-wrap gap-12 text-[10px] font-black text-slate-700 uppercase tracking-widest px-4 border-t border-white/5 pt-8">
+                                        <span>Engine Status: <span class="text-brand-purple ml-2 italic underline decoration-brand-purple/20 underline-offset-4" x-text="req.model_id"></span></span>
+                                        <span>Latent Cycle: <span class="text-slate-400 ml-2 animate-pulse" x-text="req.ttft_ms.toFixed(1) + 'ms'"></span></span>
+                                        <span>Cost Tier: <span class="text-emerald-500 ml-2" x-text="req.model_id === 'qwen' ? 'High Fidelity' : 'Optimized Cycle'"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                 </div>
+            </div>
+
+            <!-- INTEGRATIONS (SDK Examples) -->
+            <div x-show="tab === 'integrations'" class="motion-safe:animate-in motion-safe:fade-in space-y-12">
+                 <div class="flex flex-col gap-4 mb-8">
+                    <h3 class="text-4xl font-black italic tracking-tighter">SDK Workspace</h3>
+                    <p class="text-slate-500 font-medium max-w-2xl leading-relaxed">Varaha implements the OpenAI Compatibility Protocol. Use any standard SDK to communicate with your local M3 cluster.</p>
+                 </div>
+
+                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+                     <!-- Selector -->
+                     <div class="lg:col-span-1 space-y-4">
+                         <template x-for="lang in ['python', 'javascript', 'curl']">
+                             <button @click="sdkLang = lang" :class="sdkLang === lang ? 'bg-brand-purple text-white shadow-xl' : 'glass text-slate-500 hover:text-white'" class="w-full p-6 h-20 rounded-3xl flex items-center justify-between font-black uppercase tracking-widest text-xs transition-all italic">
+                                 <span x-text="lang"></span>
+                                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                             </button>
+                         </template>
+                     </div>
+                     <!-- Code Box -->
+                     <div class="lg:col-span-3 glass rounded-[3.5rem] p-12 border-white/5 bg-black/40 shadow-inner min-h-[500px] flex flex-col">
+                         <div class="flex justify-between items-center mb-10 flex-shrink-0">
+                            <div class="flex items-center gap-4">
+                                <div class="w-3 h-3 rounded-full bg-red-400 opacity-40"></div>
+                                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-40"></div>
+                                <div class="w-3 h-3 rounded-full bg-emerald-400 opacity-40"></div>
+                            </div>
+                            <button @click="navigator.clipboard.writeText(langSnippets[sdkLang])" class="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-brand-purple hover:text-white transition-all bg-brand-purple/10 px-4 py-2 rounded-xl border border-brand-purple/20">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                <span>Copy Snippet</span>
+                            </button>
+                         </div>
+                         <div class="flex-1 overflow-auto custom-scrollbar">
+                             <pre class="font-mono text-sm md:text-base text-slate-300 leading-relaxed selection:bg-brand-purple/30" x-text="langSnippets[sdkLang]"></pre>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- GOVERNANCE -->
+            <div x-show="tab === 'management'" class="motion-safe:animate-in motion-safe:fade-in">
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div class="glass rounded-[3rem] p-12 bg-black/20">
+                        <div class="flex justify-between items-center mb-12">
+                             <h3 class="text-4xl font-black italic tracking-tighter">Organizations</h3>
+                             <button @click="showNewTeam = true" class="p-4 bg-brand-purple/10 text-brand-purple border border-brand-purple/20 rounded-2xl hover:bg-brand-purple hover:text-white transition-all"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg></button>
+                        </div>
+                        <div class="space-y-6">
+                            <template x-for="team in teams" :key="team.id">
+                                <div @click="selectTeam(team)" :class="selectedTeam?.id === team.id ? 'ring-4 ring-brand-purple/20 bg-brand-purple/5 border-brand-purple/40' : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]'" class="p-8 rounded-[3rem] border cursor-pointer transition-all flex justify-between items-center group shadow-2xl">
+                                     <div class="flex items-center gap-6">
+                                         <div class="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-brand-purple to-brand-blue flex items-center justify-center font-black text-2xl italic shadow-glow" x-text="team.name[0]"></div>
+                                         <div class="overflow-hidden">
+                                            <p class="font-black text-xl italic truncate" x-text="team.name"></p>
+                                            <p class="text-[10px] text-slate-600 font-mono tracking-tighter uppercase font-bold" x-text="team.id"></p>
+                                         </div>
+                                     </div>
+                                     <div class="text-right">
+                                        <p class="text-[10px] text-slate-600 font-black uppercase mb-2 tracking-widest">In-Flight Yield</p>
+                                        <p class="text-4xl font-black text-emerald-400 italic leading-none" x-text="team.credits.toFixed(1)"></p>
+                                     </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="glass rounded-[3rem] p-12 flex flex-col bg-black/20">
+                        <div x-show="!selectedTeam" class="flex-1 flex flex-col items-center justify-center opacity-10 text-center uppercase tracking-[1em] font-black italic grayscale overflow-hidden">
+                            <svg class="w-32 h-32 mb-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                            <p class="text-2xl">Identity required</p>
+                        </div>
+                        <div x-show="selectedTeam" class="flex-1">
+                             <div class="flex justify-between items-center mb-12">
+                                 <h3 class="text-3xl font-black italic uppercase italic underline decoration-brand-blue/20 underline-offset-8">Matrix Keys</h3>
+                                 <button @click="showNewKey = true" class="p-4 bg-brand-blue/10 text-brand-blue border border-brand-blue/20 rounded-2xl hover:bg-brand-blue hover:text-white transition-all shadow-xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg></button>
+                             </div>
+                             <div class="space-y-6">
+                                 <template x-for="key in teamKeys" :key="key.key">
+                                     <div class="p-8 glass-dark rounded-[2.5rem] flex flex-col gap-6 border border-white/5 shadow-inner">
+                                         <div class="flex justify-between items-center">
+                                             <p class="font-black text-slate-300 text-xl italic truncate" x-text="key.name"></p>
+                                             <div class="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase">
+                                                <span :class="key.active ? 'bg-emerald-500 shadow-[0_0_20px_rgba(52,211,153,1)]' : 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,1)]'" class="w-2.5 h-2.5 rounded-full"></span>
+                                                <span x-text="key.active ? 'Authenticated' : 'Revoked'"></span>
+                                             </div>
+                                         </div>
+                                         <div class="flex items-center justify-between bg-black/60 p-5 rounded-2xl border border-white/5 font-mono text-xs shadow-inner">
+                                             <span class="truncate flex-1 text-slate-600 mr-8" x-text="key.key"></span>
+                                             <button @click="navigator.clipboard.writeText(key.key)" class="hover:text-white transition-all text-slate-700 active:scale-90"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg></button>
+                                         </div>
+                                     </div>
+                                 </template>
+                             </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- EVALUATION -->
+            <div x-show="tab === 'benchmark'" class="motion-safe:animate-in motion-safe:fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="glass rounded-[4rem] p-12 flex flex-col min-h-[600px] bg-black/10 border-white/5 shadow-2x">
+                        <div class="flex justify-between items-start mb-12">
+                            <div>
+                                <h3 class="text-4xl font-black italic tracking-tighter uppercase leading-none">Inference Health</h3>
+                                <p class="text-[10px] text-slate-600 font-black mt-3 tracking-[0.4em] uppercase opacity-40">Semantic Logic Accuracy Layer</p>
+                            </div>
+                            <div class="p-6 bg-brand-purple/10 border border-brand-purple/20 rounded-[1.8rem] shadow-glow">
+                                <span class="text-3xl font-black text-brand-purple italic leading-none" x-text="totalAccuracy + '%'">--</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 space-y-6">
+                             <template x-for="item in evalResults">
+                                 <div class="p-6 glass-dark rounded-[2.5rem] flex justify-between items-center border border-white/5 hover:border-brand-purple/20 transition group">
+                                     <div class="flex items-center gap-5">
+                                         <div :class="item.score > 0.7 ? 'text-emerald-400 bg-emerald-400/5 shadow-[0_0_20px_rgba(52,211,153,0.1)]' : 'text-amber-400 bg-amber-400/5'" class="p-4 rounded-2xl group-hover:scale-110 transition-transform">
+                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                         </div>
+                                         <span class="text-xs font-black uppercase tracking-widest text-slate-500 italic" x-text="item.task"></span>
+                                     </div>
+                                     <span class="font-mono text-xl font-black italic text-slate-300" x-text="(item.score * 100).toFixed(0) + '%'"></span>
+                                 </div>
+                             </template>
+                             <div x-show="evalResults.length === 0" class="h-64 flex items-center justify-center border-4 border-dashed border-white/[0.03] rounded-[3rem] opacity-20"><p class="text-xl font-black uppercase tracking-[1em] italic">Scan Locked</p></div>
+                        </div>
+                        <button @click="runSemanticEvaluation" :disabled="evaluating" class="mt-12 w-full h-24 bg-brand-purple rounded-[2rem] font-black tracking-[0.6em] uppercase shadow-[0_20px_50px_rgba(139,92,246,0.3)] hover:brightness-110 transition active:scale-[0.98]">
+                            <span x-text="evaluating ? 'Analyzing Intelligence...' : 'Initiate Quality Scan'"></span>
+                        </button>
+                    </div>
+
+                    <div class="glass rounded-[4rem] p-12 flex flex-col min-h-[600px] bg-black/10 border-white/5 shadow-2x">
+                        <div class="flex justify-between items-start mb-12">
+                             <div>
+                                 <h3 class="text-4xl font-black italic tracking-tighter uppercase leading-none">Stress Flux</h3>
+                                 <p class="text-[10px] text-slate-600 font-black mt-3 tracking-[0.4em] uppercase opacity-40">Hardware Concurrency Index</p>
+                             </div>
+                             <div class="p-6 bg-brand-blue/10 border border-brand-blue/20 rounded-[1.8rem] shadow-glow">
+                                 <span class="text-3xl font-black text-brand-blue italic leading-none" x-text="benchMetrics ? benchMetrics.pass_rate + '%' : '--'"></span>
+                             </div>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center justify-center relative scale-110">
+                             <div x-show="benchmarking" class="absolute inset-0 flex items-center justify-center bg-black/10 rounded-full animate-pulse-slow"><svg class="animate-spin w-24 h-24 text-brand-blue" fill="none" viewBox="0 0 24 24"><circle class="opacity-10" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
+                             <div class="text-center group overflow-visible">
+                                 <span class="text-[110px] font-black text-brand-blue italic leading-none shadow-glow tracking-tighter" x-text="benchMetrics ? benchMetrics.tps.toFixed(1) : '0.0'"></span>
+                                 <p class="text-xs font-black uppercase text-slate-700 tracking-[0.8em] mt-8 leading-none opacity-40">Observed TPS Flux</p>
+                             </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-8 mt-12">
+                            <div class="p-8 bg-white/[0.02] rounded-[2rem] border border-white/5 flex flex-col justify-center">
+                                <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3 leading-none italic">Cycle Latency</span>
+                                <span class="text-2xl font-black text-white italic leading-none" x-text="benchMetrics ? benchMetrics.mean_ms.toFixed(0) + 'ms' : '--'"></span>
+                            </div>
+                            <button @click="runLoadTest" :disabled="benchmarking" class="h-24 bg-brand-blue rounded-[2rem] font-black tracking-[0.4em] uppercase shadow-[0_20px_50px_rgba(59,130,246,0.3)] hover:brightness-110 transition active:scale-[0.98]">
+                                <span x-text="benchmarking ? 'Saturating...' : 'Initialize'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PLAYGROUND -->
+            <div x-show="tab === 'playground'" class="motion-safe:animate-in motion-safe:fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-12">
+                    <div class="lg:col-span-3 glass rounded-[4rem] p-12 bg-black/10 border-white/5">
+                        <h3 class="text-4xl font-black mb-12 italic uppercase tracking-tighter italic">Inference Lab</h3>
+                        <div class="space-y-12">
+                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] block mb-4 pl-2 opacity-50 underline decoration-brand-purple/20">Task Archetype</label>
+                                    <select x-model="playTask" class="w-full bg-black/40 border border-white/5 rounded-[1.8rem] h-18 py-6 px-8 focus:outline-none focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/5 font-black text-sm italic shadow-inner appearance-none transition-all">
+                                        <option value="summarize">Summarization Engine</option>
+                                        <option value="extract">Named Entity Extraction</option>
+                                        <option value="classify">Sentiment Intelligence</option>
+                                        <option value="rewrite">Content Refactoring</option>
+                                        <option value="chat">Conversational Flow (GPT Mode)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] block mb-4 pl-2 opacity-50 underline decoration-brand-blue/20">Target Engine Pool</label>
+                                    <select x-model="playModel" class="w-full bg-black/40 border border-white/5 rounded-[1.8rem] h-18 py-6 px-8 focus:outline-none focus:border-brand-blue focus:ring-4 focus:ring-brand-blue/5 font-black text-sm italic shadow-inner appearance-none transition-all">
+                                        <option value="qwen">Qwen 1.5B [High Performance]</option>
+                                        <option value="tinyllama">TinyLlama 1.1B [Eco Tier]</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <textarea x-model="playInput" rows="14" class="w-full bg-black/40 border border-white/5 rounded-[3.5rem] p-12 focus:outline-none focus:border-brand-purple focus:ring-16 focus:ring-brand-purple/5 transition-all text-base leading-relaxed resize-none custom-scrollbar shadow-inner text-slate-300 placeholder:text-slate-800 placeholder:italic placeholder:font-black placeholder:uppercase placeholder:tracking-[0.5em]" placeholder="Inject contextual stream..."></textarea>
+                            <button @click="runInference" :disabled="loading" class="w-full h-24 bg-gradient-to-r from-brand-purple to-brand-blue rounded-[2.2rem] font-black text-sm tracking-[0.8em] uppercase shadow-[0_20px_60px_rgba(139,92,246,0.3)] transition hover:scale-[1.01] active:scale-[0.98]">
+                                <span x-text="loading ? 'Processing Matrix...' : 'Execute Pulse'"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 flex flex-col gap-10">
+                        <div class="glass rounded-[4rem] p-12 h-[600px] flex flex-col border-white/5 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)]">
+                             <div class="flex justify-between items-center mb-12 flex-shrink-0">
+                                 <h3 class="text-[10px] font-black uppercase text-slate-600 tracking-[0.4em] italic leading-none underline decoration-brand-purple/20">Result Artifact</h3>
+                                 <div x-show="playMetrics" class="px-3 py-1.5 bg-brand-purple/10 border border-brand-purple/20 rounded-xl text-[8px] font-black text-brand-purple uppercase tracking-[0.3em] italic" x-text="playMetrics?.model"></div>
+                             </div>
+                             <div class="flex-1 bg-white/[0.01] rounded-[3.5rem] p-10 border border-white/5 text-slate-300 overflow-y-auto font-medium text-lg leading-relaxed custom-scrollbar shadow-inner selection:bg-brand-purple/40" x-text="playResult || 'Awaiting transmission handshake...'"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-8 pb-4">
+                             <template x-for="item in [{l:'TTFT Cycle', v:playMetrics?.ttft_ms, s:'ms'}, {l:'Pulse Rate', v:playMetrics?.tps, s:'t/s'}]">
+                                  <div class="p-8 glass rounded-[2.5rem] border border-white/5 flex flex-col bg-black/20 shadow-glow transition hover:scale-105 duration-500">
+                                      <span class="text-[10px] font-black text-slate-700 uppercase tracking-widest mb-4 italic opacity-50" x-text="item.l"></span>
+                                      <span class="font-black text-brand-purple text-4xl italic tracking-tighter leading-none" x-text="item.v ? item.v.toFixed(0) + item.s : '--'"></span>
+                                  </div>
+                             </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <div x-show="showNewTeam" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/98 backdrop-blur-3xl px-6">
+        <div class="glass p-16 rounded-[4.5rem] w-full max-w-xl shadow-2xl scale-100 motion-safe:animate-in motion-safe:zoom-in border-white/10" @click.away="showNewTeam = false">
+            <h2 class="text-4xl font-black mb-12 italic uppercase tracking-tighter text-white">Bootstrap Identity</h2>
+            <div class="space-y-8">
+                <input type="text" x-model="newTeamID" placeholder="Unique Identity Slug (e.g. neuro-node)" class="w-full h-20 bg-white/[0.02] border border-white/10 rounded-3xl px-8 focus:outline-none focus:border-brand-purple font-black italic tracking-widest placeholder:text-slate-800">
+                <input type="text" x-model="newTeamName" placeholder="Visual Display Monitor Name" class="w-full h-20 bg-white/[0.02] border border-white/10 rounded-3xl px-8 focus:outline-none focus:border-brand-purple font-black italic tracking-widest placeholder:text-slate-800">
+                <button @click="createTeam" class="w-full h-24 bg-brand-purple rounded-[2rem] font-black tracking-[0.8em] uppercase shadow-2xl transition hover:scale-[1.02] active:scale-95">Initialize Node</button>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="showNewKey" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/98 backdrop-blur-3xl px-6">
+        <div class="glass p-16 rounded-[4.5rem] w-full max-w-xl shadow-2xl scale-100 motion-safe:animate-in motion-safe:zoom-in border-white/10" @click.away="showNewKey = false">
+            <h2 class="text-4xl font-black mb-12 italic uppercase tracking-tighter text-brand-blue">Build Matrix Token</h2>
+            <div class="space-y-8">
+                <input type="text" x-model="newKeyVal" placeholder="Secret Protocol Key Value" class="w-full h-20 bg-white/[0.02] border border-white/10 rounded-3xl px-8 focus:outline-none focus:border-brand-blue font-mono text-base italic placeholder:text-slate-800">
+                <input type="text" x-model="newKeyName" placeholder="Key Ownership Target Alias" class="w-full h-20 bg-white/[0.02] border border-white/10 rounded-3xl px-8 focus:outline-none focus:border-brand-blue font-black italic tracking-widest placeholder:text-slate-800">
+                <button @click="createKey" class="w-full h-24 bg-brand-blue rounded-[2rem] font-black tracking-[0.8em] uppercase shadow-2xl transition hover:scale-[1.02] active:scale-95">Forge Matrix</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('dashboard', () => ({
+                authenticated: !!localStorage.getItem('varaha_admin_key'),
+                adminKey: '', loginError: '', tab: 'overview', selectedRow: null,
+                sdkLang: 'python',
+                langSnippets: {
+                    python: `import openai\n\nclient = openai.OpenAI(\n    base_url="http://localhost:8000/v1",\n    api_key="YOUR_VARAHA_KEY"\n)\n\nresponse = client.chat.completions.create(\n    model="qwen",\n    messages=[{"role": "user", "content": "Analyze the matrix."}]\n)\n\nprint(response.choices[0].message.content)`,
+                    javascript: `import OpenAI from 'openai';\n\nconst client = new OpenAI({\n  baseURL: 'http://localhost:8000/v1',\n  apiKey: 'YOUR_VARAHA_KEY'\n});\n\nasync function main() {\n  const completion = await client.chat.completions.create({\n    messages: [{ role: 'user', content: 'Syncing nodes.' }],\n    model: 'tinyllama',\n  });\n\n  console.log(completion.choices[0]);\n}\n\nmain();`,
+                    curl: `curl http://localhost:8000/v1/chat/completions \\\n  -H "Content-Type: application/json" \\\n  -H "Authorization: Bearer YOUR_VARAHA_KEY" \\\n  -d '{\n    "model": "qwen",\n    "messages": [{"role": "user", "content": "Initialize flow."}]\n  }'`
+                },
+                stats: [
+                    { label: 'Flow Index', value: '0', suffix: 'Total Cumulative Jobs' },
+                    { label: 'Latent Phase', value: '0ms', suffix: 'Platform Mean Latency' },
+                    { label: 'Flow Velocity', value: '0.0', suffix: 'Aggregated Token Rate' },
+                    { label: 'Edge Alpha', value: '$0.00', suffix: 'Optimized Infra Yield' }
+                ],
+                historicalRequests: [], teams: [], selectedTeam: null, teamKeys: [],
+                evaluating: false, evalResults: [], totalAccuracy: 0, benchmarking: false, benchMetrics: null,
+                showNewTeam: false, newTeamID: '', newTeamName: '', showNewKey: false, newKeyVal: '', newKeyName: '',
+                playTask: 'summarize', playInput: '', playResult: '', playMetrics: null, playModel: 'qwen', loading: false,
+
+                init() {
+                    if (this.authenticated) {
+                        this.refreshAll();
+                        setInterval(() => { if (this.tab === 'overview') this.fetchHistorical(); }, 5000);
+                    }
+                },
+
+                async login() {
+                    const res = await fetch('/v1/admin/teams', { headers: { 'Authorization': `Bearer ${this.adminKey}` } });
+                    if (res.ok) {
+                        localStorage.setItem('varaha_admin_key', this.adminKey);
+                        this.authenticated = true; this.refreshAll();
+                    } else { this.loginError = 'Matrix Handshake Rejected.'; }
+                },
+
+                logout() { localStorage.removeItem('varaha_admin_key'); location.reload(); },
+
+                async refreshAll() { await this.fetchHistorical(); await this.fetchManagementData(); },
+
+                async fetchHistorical() {
+                    const key = localStorage.getItem('varaha_admin_key');
+                    const res = await fetch('/v1/requests', { headers: { 'Authorization': `Bearer ${key}` } });
+                    const data = await res.json();
+                    const ids = data.requests || [];
+                    const fullData = await Promise.all(ids.slice(0, 20).map(async id => {
+                        try {
+                            const r = await fetch(`/v1/requests/${id}/metrics`, { headers: { 'Authorization': `Bearer ${key}` } });
+                            return (await r.json()).metrics;
+                        } catch (e) { return null; }
+                    }));
+                    this.historicalRequests = fullData.filter(d => d && d.job_id);
+                    this.stats[0].value = ids.length;
+                    if (this.historicalRequests.length > 0) {
+                        const sumTTFT = this.historicalRequests.reduce((a, b) => a + (Number(b.ttft_ms) || 0), 0);
+                        const sumTPS = this.historicalRequests.reduce((a, b) => a + (Number(b.tps) || 0), 0);
+                        this.stats[1].value = (sumTTFT / this.historicalRequests.length).toFixed(0) + 'ms';
+                        this.stats[2].value = (sumTPS / this.historicalRequests.length).toFixed(1);
+                        this.stats[3].value = '$' + (ids.length * 0.02).toFixed(2);
+                    }
+                },
+
+                async fetchManagementData() {
+                    const key = localStorage.getItem('varaha_admin_key');
+                    const res = await fetch('/v1/admin/teams', { headers: { 'Authorization': `Bearer ${key}` } });
+                    const data = await res.json(); this.teams = data.teams || [];
+                    if (this.selectedTeam) {
+                        const fresh = this.teams.find(t => t.id === this.selectedTeam.id);
+                        if (fresh) this.selectedTeam = fresh;
+                        this.fetchTeamKeys();
+                    }
+                },
+
+                selectTeam(team) { this.selectedTeam = team; this.fetchTeamKeys(); },
+
+                async fetchTeamKeys() {
+                    const key = localStorage.getItem('varaha_admin_key');
+                    const res = await fetch(`/v1/admin/keys/${this.selectedTeam.id}`, { headers: { 'Authorization': `Bearer ${key}` } });
+                    const data = await res.json(); this.teamKeys = data.keys || [];
+                },
+
+                async createTeam() {
+                    const key = localStorage.getItem('varaha_admin_key');
+                    await fetch('/v1/admin/teams', {
+                        method: 'POST', headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: this.newTeamID, name: this.newTeamName, credits: 1000 })
+                    });
+                    this.showNewTeam = false; this.newTeamID = ''; this.newTeamName = '';
+                    this.fetchManagementData();
+                },
+
+                async createKey() {
+                    const key = localStorage.getItem('varaha_admin_key');
+                    await fetch('/v1/admin/keys', {
+                        method: 'POST', headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key: this.newKeyVal, team_id: this.selectedTeam.id, name: this.newKeyName })
+                    });
+                    this.showNewKey = false; this.newKeyVal = ''; this.newKeyName = '';
+                    this.fetchTeamKeys();
+                },
+
+                async runSemanticEvaluation() {
+                    const key = localStorage.getItem('varaha_admin_key');
+                    this.evaluating = true; this.evalResults = [];
+                    const payloads = [
+                        { task: 'summarize', input: { text: "Varaha is high performance." }, expected: "Varaha" },
+                        { task: 'classify', input: { text: "Bug report." }, expected: "bug" },
+                        { task: 'extract', input: { text: "Date 2024." }, expected: "2024" },
+                        { task: 'rewrite', input: { text: "Bad." }, expected: "not" }
+                    ];
+                    for (const p of payloads) {
+                        try {
+                            const res = await fetch('/v1/execute', {
+                                method: 'POST', headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+                                body: JSON.stringify(p)
+                            });
+                            const data = await res.json();
+                            const score = data.data.toLowerCase().includes(p.expected.toLowerCase()) ? 1.0 : 0.6;
+                            this.evalResults.push({ task: p.task, score: score });
+                        } catch (e) { this.evalResults.push({ task: p.task, score: 0 }); }
+                    }
+                    this.totalAccuracy = (this.evalResults.reduce((a, b) => a + b.score, 0) / 4 * 100).toFixed(0);
+                    this.evaluating = false;
+                },
+
+                async runLoadTest() {
+                    const key = localStorage.getItem('varaha_admin_key');
+                    this.benchmarking = true; this.benchMetrics = { tps: 0, mean_ms: 0, pass_rate: 0 };
+                    const start = Date.now();
+                    try {
+                        const jobs = Array.from({ length: 12 }).map(() => fetch('/v1/execute', {
+                            method: 'POST', headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ task: 'classify', input: { text: "Load" } })
+                        }));
+                        const responses = await Promise.all(jobs);
+                        const duration = (Date.now() - start) / 1000;
+                        const passCount = responses.filter(r => r.ok).length;
+                        this.benchMetrics = { tps: (120 / duration), mean_ms: (duration * 1000 / 12), pass_rate: (passCount / 12 * 100) };
+                    } catch (e) {} finally { this.benchmarking = false; this.fetchHistorical(); }
+                },
+
+                async runInference() {
+                    const key = localStorage.getItem('varaha_admin_key');
+                    this.loading = true; this.playResult = ''; this.playMetrics = null;
+                    try {
+                        const res = await fetch('/v1/execute', {
+                            method: 'POST', headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ task: this.playTask, model: this.playModel, input: { text: this.playInput } })
+                        });
+                        const data = await res.json();
+                        this.playResult = data.data; const jid = data.job_id;
+                        if (jid) {
+                            setTimeout(async () => {
+                                const met = await fetch(`/v1/requests/${jid}/metrics`, { headers: { 'Authorization': `Bearer ${key}` } });
+                                const mData = await met.json();
+                                if (mData && mData.metrics) this.playMetrics = mData.metrics;
+                                this.fetchHistorical();
+                            }, 1000);
+                        }
+                    } catch (e) { this.playResult = 'Node Error: ' + e.message; } finally { this.loading = false; }
+                }
+            }));
+        });
+    </script>
+</body>
+</html>

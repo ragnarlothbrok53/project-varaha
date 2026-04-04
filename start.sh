@@ -3,10 +3,18 @@
 # Configuration
 PORT=${1:-8000}
 
+# 🔍 Pre-flight check: Model exists?
+if [ ! -d "models" ] || [ -z "$(ls models/*.gguf 2>/dev/null)" ]; then
+    echo "❌ Error: No .gguf models found in 'models/' directory."
+    echo "💡 Please place a model file (e.g. qwen.gguf) in the models/ folder and try again."
+    exit 1
+fi
+
 echo "🚀 Starting Varaha LLM Server on port $PORT..."
 
 # Start in background using uv run
-uv run uvicorn app.main:app --port $PORT --log-level info &
+# We disable uvicorn's default logging to favor our structured production logger
+uv run uvicorn app.main:app --port $PORT --no-access-log --log-level critical &
 SERVER_PID=$!
 
 # Function to clean up background process on exit
@@ -30,20 +38,15 @@ while ! curl -s "http://localhost:$PORT/docs" > /dev/null; do
     fi
 done
 
-echo "✅ Server is up! Running initial readiness test..."
+echo "✅ Server is up! Running automated semantic evaluation test..."
 
-# Test Summarization task
-curl -X POST "http://localhost:$PORT/v1/execute" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: dev-key-123" \
-     -d '{
-       "task": "summarize",
-       "input": {
-         "text": "Antigravity has refactored the project into a modular structure. It now uses llama-cpp-python with Metal acceleration on Mac, replacing the old mock batch implementation."
-       }
-     }'
+# Test with our golden dataset
+uv run python -m tests.evaluator "http://localhost:$PORT"
 
-echo -e "\n\n🎉 Readiness test complete. Use Ctrl+C to stop the server and see logs."
+echo "⚡ Running Concurrency Benchmark (Latency & Throughput)..."
+uv run python -m tests.bencher "http://localhost:$PORT" 5 20
+
+echo -e "\n\n🎉 Startup verification complete. Server logs will appear below. Use Ctrl+C to stop."
 
 # Bring background process to foreground
 wait $SERVER_PID

@@ -1,0 +1,39 @@
+[
+  {
+    "name": "Summary Check",
+    "task": "summarize",
+    "input": {
+      "text": "The Varaha proxy implements dynamic batching and Metal acceleration for running LLMs on Mac. It reduces the overhead of single inference requests and maximizes throughput."
+    },
+    "expected_meaning": "Varaha uses batching and Apple Silicon acceleration to efficiently run LLMs on Mac."
+  },
+  {
+    "name": "Extraction Check",
+    "task": "extract",
+    "input": {
+      "text": "On Jan 1st 2024, the team launched Project Varaha version 1.0. The budget was $50,000.",
+      "schema": {
+        "date": "launch date",
+        "budget": "total amount"
+      }
+    },
+    "expected_meaning": "date: 2024-01-01, budget: 50000"
+  },
+  {
+    "name": "Classification Check",
+    "task": "classify",
+    "input": {
+      "text": "The application crashed while loading the model on an M1 Mac with 8GB RAM.",
+      "labels": ["bug", "feature", "question"]
+    },
+    "expected_meaning": "bug"
+  },
+  {
+    "name": "Rewrite Check",
+    "task": "rewrite",
+    "input": {
+      "text": "It is not work very good"
+    },
+    "expected_meaning": "It is not performing well. / It is not working effectively."
+  }
+]

@@ -1,6 +1,6 @@
 import time
 from fastapi import HTTPException
-from .worker import usage
+from ..core.worker import usage
 from .config import API_KEY_RATE_LIMIT
 
 def enforce_rate_limit(api_key: str, limit_per_minute: int = API_KEY_RATE_LIMIT):
