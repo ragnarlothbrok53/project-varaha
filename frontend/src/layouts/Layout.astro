@@ -35,5 +35,64 @@ import '../styles/globals.css'
       <img src="/mandala1.svg" alt="Mandala Decoration" class="w-full h-full object-contain opacity-40" />
     </div>
     <slot />
-  </body>
+    <footer class="border-t border-white/10 glass backdrop-blur-md mt-8">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid md:grid-cols-4 gap-8 text-center md:text-left">
+          <div>
+            <h4 class="text-white font-semibold mb-3">Product</h4>
+            <ul class="space-y-2 text-sm text-gray-300">
+              <li><a href="/pricing" class="hover:text-white transition-colors">Pricing</a></li>
+              <li><a href="/dashboard" class="hover:text-white transition-colors">Dashboard</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="text-white font-semibold mb-3">Legal</h4>
+            <ul class="space-y-2 text-sm text-gray-300">
+              <li><a href="/terms" class="hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="/privacy" class="hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a href="/cookies" class="hover:text-white transition-colors">Cookie Policy</a></li>
+              <li><a href="/dpa" class="hover:text-white transition-colors">Data Processing Agreement</a></li>
+              <li><a href="/refund-policy" class="hover:text-white transition-colors">Refund Policy</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="text-white font-semibold mb-3">Company</h4>
+            <ul class="space-y-2 text-sm text-gray-300">
+              <li><a href="mailto:support@varaha.ai" class="hover:text-white transition-colors">Contact Support</a></li>
+              <li><a href="https://github.com/varaha-ai" class="hover:text-white transition-colors" target="_blank">GitHub</a></li>
+              <li><a href="https://status.varaha.ai" class="hover:text-white transition-colors" target="_blank">System Status</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="text-white font-semibold mb-3">Connect</h4>
+            <div class="flex space-x-4 justify-center">
+              <a href="https://twitter.com/varaha_ai" class="text-gray-400 hover:text-white transition-colors" target="_blank">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M23 3a10 10 0 1-10 10 0 1 4 0h-4a2 2 0 0-2 2v12a2 2 0 0 2 2h4a2 2 0 0 2-2 2v-12z"/>
+                </svg>
+              </a>
+              <a href="https://linkedin.com/company/varaha-ai" class="text-gray-400 hover:text-white transition-colors" target="_blank">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20.447 20.452h-3.554v-9.274h3.554c0-1.857.748-3.375 1.857-3.375s3.375-1.857 3.375-1.857h-7.109v16.872h7.109c0 1.857.748 3.375 1.857 3.375s-3.375 1.857-3.375 1.857h-7.109v-16.872h7.109c-1.857-.748-3.375-1.857-3.375s-3.375-1.857-3.375-1.857h-7.109z"/>
+                </svg>
+              </a>
+              <a href="https://discord.gg/varaha" class="text-gray-400 hover:text-white transition-colors" target="_blank">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20.317 4.369a9.822 9.822 0 0-2.176-2.176c0-5.426-4.402-9.822-9.822s-4.402 9.822-4.402v2.176c0 5.426 4.402 9.822 9.822 4.402 9.822 5.426 9.822 2.176c0 5.426-4.402-9.822-9.822s4.402-9.822v-2.176c0-5.426-4.402-9.822-9.822-4.402-9.822v2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176c0 5.426-4.402-9.822-9.822-4.402-9.822v2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0-5.426-4.402-9.822-9.822-4.402-9.822h2.176c0 5.426-4.402-9.822-9.822-4.402-9.822v2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176c0 5.426-4.402-9.822-9.822-4.402-9.822h2.176v-2.176z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-8 pt-8 border-t border-white/10 text-center text-sm text-gray-400">
+          <p>&copy; 2026 Varaha AI. All rights reserved.</p>
+          <div class="flex justify-center space-x-6 mt-2">
+            <a href="/terms" class="hover:text-white transition-colors">Terms</a>
+            <span class="text-gray-600">•</span>
+            <a href="/privacy" class="hover:text-white transition-colors">Privacy</a>
+          </div>
 </html>

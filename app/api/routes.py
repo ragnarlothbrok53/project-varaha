@@ -3,10 +3,13 @@ import asyncio
 import uuid
 import base64
 import io
+import sqlite3
 import pypdf
 import docx
 from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import StreamingResponse
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from ..core.worker import job_queue, results
 from ..data.manager import (
@@ -15,32 +18,42 @@ from ..data.manager import (
     deactivate_api_key
 )
 from ..utils.helpers import sse, chunk_text
+from ..utils.config import get_settings
 from ..services.builder import build_prompt
 from .auth import verify_jwt
+from .schemas import (
+    ExecuteRequest, ChatCompletionRequest, APIKeyCreateRequest, 
+    APIKeyUpdateRequest, ExecuteResponse, ErrorResponse
+)
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
+settings = get_settings()
 
 # --- Public/Inference Endpoints ---
 
 @router.get("/v1/requests")
-async def list_requests():
+@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}minute")
+async def list_requests(request: Request):
     return {"requests": get_all_job_ids()}
 
 @router.get("/v1/requests/{job_id}/metrics")
-async def get_metrics(job_id: str):
+@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}minute")
+async def get_metrics(job_id: str, request: Request):
     metrics = get_job_metrics(job_id)
     if not metrics:
         raise HTTPException(status_code=404, detail="Request metrics not found")
     return {"job_id": job_id, "metrics": metrics}
 
 @router.get("/v1/requests/key/{api_key}")
-async def get_key_requests(api_key: str, user: dict = Depends(verify_jwt)):
+@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}minute")
+async def get_key_requests(api_key: str, user: dict = Depends(verify_jwt), request: Request = None):
     # Note: For production, we should enforce that api_key belongs to user["id"]
     return {"requests": get_metrics_by_key(api_key)}
 
-@router.post("/v1/execute")
-async def execute(request: Request):
-    body = await request.json()
+@router.post("/v1/execute", response_model=ExecuteResponse)
+@limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}minute")
+async def execute(execute_request: ExecuteRequest, request: Request):
     auth_header = request.headers.get("Authorization", "")
     api_key = auth_header.replace("Bearer ", "").strip()
     key_info = validate_api_key(api_key)
@@ -254,6 +267,40 @@ async def admin_create_key(request: Request, user: dict = Depends(verify_jwt)):
 @router.get("/v1/admin/keys")
 async def get_keys(user: dict = Depends(verify_jwt)):
     return {"keys": get_user_keys(user["id"])}
+
+@router.put("/v1/admin/keys/{api_key}")
+async def admin_update_key(api_key: str, request: Request, user: dict = Depends(verify_jwt)):
+    # First verify the key belongs to the user
+    user_keys = get_user_keys(user["id"])
+    key_exists = any(k["key"] == api_key for k in user_keys)
+    
+    if not key_exists:
+        raise HTTPException(status_code=404, detail="Key not found or doesn't belong to user")
+    
+    body = await request.json()
+    
+    try:
+        conn = sqlite3.connect("varaha_metrics.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            UPDATE api_keys 
+            SET name = ?, model_id = ?, temperature = ?, system_prompt = ?
+            WHERE key = ?
+        """, (
+            body.get("name"),
+            body.get("model_id", "qwen"),
+            body.get("temperature", 0.1),
+            body.get("system_prompt", ""),
+            api_key
+        ))
+        
+        conn.commit()
+        conn.close()
+        
+        return {"message": "Key updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update key: {str(e)}")
 
 @router.delete("/v1/admin/keys/{api_key}")
 async def admin_delete_key(api_key: str, user: dict = Depends(verify_jwt)):

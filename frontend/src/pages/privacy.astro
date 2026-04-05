@@ -1,0 +1,320 @@
+---
+import Layout from '../layouts/Layout.astro'
+---
+
+<Layout title="Privacy Policy - Varaha">
+  <nav class="border-b border-white/10 glass backdrop-blur-md">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <div class="flex items-center space-x-8">
+          <a href="/" class="flex items-center space-x-2 relative">
+            <img src="/mandala2.svg" alt="Varaha Logo" class="w-10 h-10 object-contain scale-110 opacity-40 animate-spin animate-duration-1000" style="filter: brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(15deg) brightness(1.2);" />
+            <span class="text-2xl font-semibold text-white tracking-widest transform -translate-x-5">varaha<span class="text-brand-purple">.ai</span></span>
+          </a>
+          <div class="hidden md:flex space-x-6">
+            <a href="/docs" class="text-gray-300 hover:text-white transition-colors">Docs</a>
+            <a href="/pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
+            <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-16 px-4">
+    <div class="container mx-auto max-w-4xl">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-white mb-4">Privacy Policy</h1>
+        <p class="text-lg text-gray-300">Last updated: April 5, 2026</p>
+      </div>
+
+      <div class="glass-enhanced rounded-xl border border-white/10 p-8 space-y-8">
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">1. Information We Collect</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>1.1 Account Information:</strong> When you create an account, we collect:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Email address</li>
+              <li>Full name</li>
+              <li>Password (encrypted)</li>
+              <li>Username</li>
+            </ul>
+            
+            <p>
+              <strong>1.2 Usage Data:</strong> We automatically collect:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>API request logs and timestamps</li>
+              <li>Token usage statistics</li>
+              <li>Performance metrics (latency, throughput)</li>
+              <li>IP address (for rate limiting)</li>
+              <li>Browser and device information</li>
+            </ul>
+            
+            <p>
+              <strong>1.3 Content Data:</strong> We process but do not store:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Text inputs to AI models</li>
+              <li>AI-generated responses</li>
+              <li>Uploaded files (processed and deleted)</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">2. How We Use Your Information</h2>
+          <div class="space-y-4 text-gray-300">
+            <p><strong>2.1 Service Delivery:</strong></p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Authenticate users and manage accounts</li>
+              <li>Process AI requests and generate responses</li>
+              <li>Provide usage analytics and metrics</li>
+              <li>Enforce rate limits and prevent abuse</li>
+            </ul>
+            
+            <p><strong>2.2 Communication:</strong></p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Send account notifications</li>
+              <li>Respond to support requests</li>
+              <li>Communicate service updates</li>
+              <li>Process password reset requests</li>
+            </ul>
+            
+            <p><strong>2.3 Improvement:</strong></p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Analyze usage patterns to improve service</li>
+              <li>Monitor performance and optimize models</li>
+              <li>Develop new features and capabilities</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">3. Data Storage and Security</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>3.1 Storage Duration:</strong> Account information is retained while your account is active. 
+              Usage data is retained for 12 months for analytics and billing purposes.
+            </p>
+            
+            <p>
+              <strong>3.2 Security Measures:</strong> We implement industry-standard security:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Encryption of passwords (bcrypt)</li>
+              <li>JWT tokens for authentication</li>
+              <li>HTTPS/TLS encryption for data transmission</li>
+              <li>Regular security audits and updates</li>
+              <li>Access controls and authentication</li>
+            </ul>
+            
+            <p>
+              <strong>3.3 Data Minimization:</strong> We collect only data necessary for service delivery 
+              and regularly delete unnecessary information.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">4. Your Rights and Choices</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>4.1 Access and Correction:</strong> You have the right to:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Access your account information</li>
+              <li>Update personal details</li>
+              <li>Delete your account and data</li>
+              <li>Export your usage data</li>
+            </ul>
+            
+            <p>
+              <strong>4.2 Data Portability:</strong> You can request a copy of your data 
+              in a machine-readable format at any time.
+            </p>
+            
+            <p>
+              <strong>4.3 Opt-Out Options:</strong> You may:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Opt out of marketing communications</li>
+              <li>Delete your account and associated data</li>
+              <li>Request data deletion under applicable laws</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">5. Cookies and Tracking</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>5.1 Essential Cookies:</strong> We use cookies necessary for:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Authentication and session management</li>
+              <li>Security and fraud prevention</li>
+              <li>Service functionality and preferences</li>
+            </ul>
+            
+            <p>
+              <strong>5.2 Analytics Cookies:</strong> We may use:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Google Analytics for website usage</li>
+              <li>Performance monitoring cookies</li>
+              <li>A/B testing cookies</li>
+            </ul>
+            
+            <p>
+              <strong>5.3 Cookie Control:</strong> You can control cookies through browser settings. 
+              Disabling essential cookies may affect service functionality.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">6. Third-Party Services</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>6.1 Payment Processors:</strong> We use trusted third-party services for:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Payment processing (Stripe)</li>
+              <li>Subscription management</li>
+              <li>Billing and invoicing</li>
+            </ul>
+            
+            <p>
+              <strong>6.2 Email Services:</strong> Password reset emails are sent via:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Your configured SMTP provider</li>
+              <li>Google Workspace (for default setup)</li>
+            </ul>
+            
+            <p>
+              <strong>6.3 Third-Party Policies:</strong> These services have their own privacy policies. 
+              We are not responsible for their data practices.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">7. International Data Transfers</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>7.1 Data Location:</strong> Our servers are located in the United States. 
+              Your data may be processed and stored outside your country of residence.
+            </p>
+            
+            <p>
+              <strong>7.2 EU Users:</strong> For European users, we comply with GDPR requirements 
+              and provide additional protections through our Data Processing Agreement.
+            </p>
+            
+            <p>
+              <strong>7.3 Safeguards:</strong> We implement appropriate safeguards for international 
+              data transfers including standard contractual clauses and technical measures.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">8. Data Breach Notification</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>8.1 Notification Timeline:</strong> In the event of a data breach, we will:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Notify affected users within 72 hours</li>
+              <li>Provide details of the breach</li>
+              <li>Explain potential impacts</li>
+              <li>Outline remediation steps</li>
+            </ul>
+            
+            <p>
+              <strong>8.2 Notification Methods:</strong> We will notify users via:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Email to registered address</li>
+              <li>Dashboard notifications</li>
+              <li>Website banners for critical issues</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">9. Children's Privacy</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>9.1 Age Restriction:</strong> Our service is not intended for children under 13. 
+              We do not knowingly collect personal information from children.
+            </p>
+            
+            <p>
+              <strong>9.2 Parental Consent:</strong> If we learn we have collected information 
+              from a child, we will delete it immediately.
+            </p>
+            
+            <p>
+              <strong>9.3 Educational Use:</strong> Schools and educational institutions must 
+              obtain appropriate parental consent for student use.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">10. Changes to This Policy</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>10.1 Policy Updates:</strong> We may update this privacy policy to reflect 
+              changes in our practices or legal requirements.
+            </p>
+            
+            <p>
+              <strong>10.2 Notification:</strong> Significant changes will be communicated via:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Email notifications</li>
+              <li>Dashboard announcements</li>
+              <li>Website banners</li>
+            </ul>
+            
+            <p>
+              <strong>10.3 Continued Use:</strong> Continued use of the service after changes 
+              constitutes acceptance of the updated policy.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">11. Contact and Complaints</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>11.1 Privacy Questions:</strong> For privacy-related inquiries or complaints:
+            </p>
+            <div class="glass-enhanced rounded-lg p-4 border border-white/10">
+              <p>Email: privacy@varaha.ai</p>
+              <p>Response Time: Within 7 business days</p>
+              <p>Regulatory Contact: dpo@varaha.ai (EU users)</p>
+            </div>
+            
+            <p>
+              <strong>11.2 Regulatory Rights:</strong> Users in certain jurisdictions have 
+              additional rights under local privacy laws. We will respect and facilitate these rights.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <div class="mt-8 text-center">
+        <a href="/terms" class="text-brand-purple hover:text-brand-blue transition-colors mr-6">Terms of Service</a>
+        <a href="/refund-policy" class="text-brand-purple hover:text-brand-blue transition-colors mr-6">Refund Policy</a>
+        <a href="/dpa" class="text-brand-purple hover:text-brand-blue transition-colors">Data Processing Agreement</a>
+      </div>
+    </div>
+  </main>
+</Layout>

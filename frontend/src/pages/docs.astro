@@ -1,196 +1,1405 @@
 ---
-import Layout from '../layouts/Layout.astro'
-import { authService } from '../lib/auth.ts'
-const user = authService.getUser()
+import Layout from "../layouts/Layout.astro";
+import { authService } from "../lib/auth.ts";
+
+const user = authService.getUser();
 ---
 
-<Layout title="Documentation - Varaha">
+<Layout title="API Documentation - Varaha">
   <nav class="border-b border-white/10 glass backdrop-blur-md">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between">
         <div class="flex items-center space-x-8">
           <a href="/" class="flex items-center space-x-2 relative">
-            <img src="/mandala2.svg" alt="Varaha Logo" class="w-10 h-10 object-contain scale-110 opacity-40 animate-spin animate-duration-1000" style="filter: brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(15deg) brightness(1.2);" />
-            <span class="text-2xl font-semibold text-white tracking-widest transform -translate-x-5">varaha<span class="text-brand-purple">.ai</span></span>
+            <img
+              src="/mandala2.svg"
+              alt="Varaha Logo"
+              class="w-10 h-10 object-contain scale-110 opacity-40 animate-spin animate-duration-1000"
+              style="filter: brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(15deg) brightness(1.2);"
+            />
+            <span
+              class="text-2xl font-semibold text-white tracking-widest transform -translate-x-5"
+              >varaha<span class="text-brand-purple">.ai</span></span
+            >
           </a>
           <div class="hidden md:flex space-x-6">
-            <a href="/docs" class="text-gray-300 hover:text-white transition-colors">Docs</a>
-            <a href="/pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
-            <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+            <a href="/docs" class="text-white font-medium">API Docs</a>
+            <a
+              href="/api-test"
+              class="text-gray-300 hover:text-white transition-colors"
+              >API Test</a
+            >
           </div>
         </div>
         <div class="flex items-center space-x-4">
-          <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-300">{user?.name || 'Guest'}</span>
-            {user ? (
-              <a href="/settings" class="px-3 py-1 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-colors text-white">
-                Settings
-              </a>
-            ) : (
-              <>
-                <a href="/login" class="px-3 py-1 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-colors text-white">
-                  Login
-                </a>
-                <a href="/register" class="px-3 py-1 text-sm bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 transition-all">
-                  Sign Up
-                </a>
-              </>
-            )}
-          </div>
+          <button
+            id="logoutBtn"
+            class="px-4 py-2 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-colors text-white"
+          >
+            Logout
+          </button>
         </div>
       </div>
     </div>
   </nav>
 
-  <main class="py-8">
-    <div class="container mx-auto px-4 max-w-4xl">
-      <div class="mb-8">
-        <h1 class="text-4xl font-bold text-white mb-4">Documentation</h1>
-        <p class="text-xl text-gray-300">Complete guide to unlimited SLM inference with specialized task APIs</p>
-      </div>
+  <!-- HEADER -->
+  <div class="container mx-auto px-4 py-6 text-center">
+    <h2 class="text-3xl font-bold text-white mb-4">
+      Interactive API Documentation
+    </h2>
+    <p class="text-gray-300">Test endpoints directly</p>
+  </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <aside class="md:col-span-1">
-          <nav class="sticky top-8">
-            <div class="glass p-4 rounded-lg backdrop-blur-md border border-white/10">
-              <h3 class="font-semibold text-white mb-4">Table of Contents</h3>
-              <ul class="space-y-2">
-                <li><a href="#getting-started" class="text-brand-purple hover:underline">Getting Started</a></li>
-                <li><a href="#api-reference" class="text-brand-purple hover:underline">API Reference</a></li>
-                <li><a href="#tasks" class="text-brand-purple hover:underline">Available Tasks</a></li>
-                <li><a href="#configuration" class="text-brand-purple hover:underline">Configuration</a></li>
-                <li><a href="#monitoring" class="text-brand-purple hover:underline">Monitoring</a></li>
-              </ul>
+  <!-- TABS -->
+  <div class="container mx-auto px-4 mb-8">
+    <div class="flex space-x-4 border-b border-white/10">
+      <button
+        onclick="showTab('chat')"
+        id="chatTab"
+        class="px-4 py-2 text-white font-medium border-b-2 border-brand-purple transition-colors"
+      >
+        Chat Completions
+      </button>
+      <button
+        onclick="showTab('tasks')"
+        id="tasksTab"
+        class="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+      >
+        Tasks
+      </button>
+    </div>
+  </div>
+
+  <main class="py-8 font-sans">
+    <div class="container mx-auto px-4 max-w-5xl">
+      <!-- CHAT COMPLETIONS TAB -->
+      <div id="chatContent" class="space-y-12">
+        <section>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl text-white font-sans">Chat Completions</h2>
+            <button
+              onclick="runChat()"
+              class="px-6 py-3 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 shadow-lg font-medium transition-all"
+            >
+              Test Chat
+            </button>
+          </div>
+
+          <!-- Terminal UI -->
+          <div
+            class="glass-purple rounded-2xl p-6 shadow-2xl relative border border-white/20 font-mono text-sm mb-6"
+          >
+            <div class="flex items-center gap-2 mb-4 px-2">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              <span class="ml-2 text-gray-400 text-xs">chat-completions</span>
             </div>
-          </nav>
-        </aside>
 
-        <div class="md:col-span-3 space-y-12">
-          <section id="getting-started">
-            <div class="glass p-6 rounded-lg backdrop-blur-md border border-white/10">
-              <h2 class="text-2xl font-bold text-white mb-4">Getting Started</h2>
-              <div class="prose prose-gray max-w-none">
-                <p class="text-gray-300 mb-4">
-                  Varaha is a production-ready SLM proxy designed for unlimited local inference and specialized task APIs. 
-                  Perfect for indie developers looking to integrate AI into their day-to-day workloads.
-                </p>
-                
-                <h3 class="text-lg font-semibold mb-2 text-white">Prerequisites</h3>
-                <ul class="list-disc pl-6 space-y-1 text-gray-300">
-                  <li>Hardware: M1/M2/M3 Mac with Metal acceleration</li>
-                  <li>Local model files in the models/ directory</li>
-                  <li>API key from your dashboard (for Pro features)</li>
-                </ul>
+            <div class="space-y-4 text-gray-300 px-2 pb-2">
+              <!-- Endpoint Info -->
+              <div class="text-brand-blue">$ POST /v1/chat/completions</div>
 
-                <h3 class="text-lg font-semibold mb-2 mt-4 text-white">Quick Start</h3>
-                <pre class="bg-black/50 p-4 rounded-lg overflow-x-auto border border-white/10">
-                  <code class="text-green-400">git clone https://github.com/your-repo/varaha
-cd varaha
-chmod +x start.sh
-./start.sh</code>
-                </pre>
+              <!-- Request -->
+              <div>
+                <div class="text-gray-400 mb-2"># Request JSON:</div>
+                <pre
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">{`{
+  "model": "qwen",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello! How are you?"
+    }
+  ],
+  "temperature": 0.7
+}`}</pre>
+              </div>
+
+              <!-- Response -->
+              <div>
+                <div class="text-gray-400 mb-2"># Response JSON:</div>
+                <pre
+                  id="chatResponse"
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">Click "Test" to see response...</pre>
+              </div>
+
+              <!-- Metrics -->
+              <div>
+                <div class="text-gray-400 mb-2"># Metrics:</div>
+                <pre
+                  id="chatMetrics"
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">TTFT: --ms | Tokens: -- | TPS: --</pre>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section id="api-reference">
-            <div class="glass p-6 rounded-lg backdrop-blur-md border border-white/10">
-              <h2 class="text-2xl font-bold text-white mb-4">API Reference</h2>
-              <div class="prose prose-gray max-w-none">
-                <h3 class="text-lg font-semibold mb-2 text-white">Execute a Task</h3>
-                <p class="text-gray-300 mb-2">POST /v1/execute</p>
-                <pre class="bg-black/50 p-4 rounded-lg overflow-x-auto border border-white/10">
-                  <code class="text-green-400">{`{
+          <!-- Code Snippets -->
+          <div
+            class="glass-purple rounded-2xl p-6 shadow-2xl relative border border-white/20"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-white">Code Snippets</h3>
+              <div class="flex space-x-2">
+                <button
+                  onclick="showCodeTab('chat', 'python')"
+                  id="chatPythonTab"
+                  class="px-3 py-1 text-sm bg-brand-purple text-white rounded hover:bg-brand-purple/90 transition-colors"
+                  >Python</button
+                >
+                <button
+                  onclick="showCodeTab('chat', 'javascript')"
+                  id="chatJsTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >JavaScript</button
+                >
+                <button
+                  onclick="showCodeTab('chat', 'typescript')"
+                  id="chatTsTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >TypeScript</button
+                >
+                <button
+                  onclick="showCodeTab('chat', 'dart')"
+                  id="chatDartTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >Dart</button
+                >
+              </div>
+            </div>
+
+            <!-- Python Code -->
+            <div id="chatPythonCode" class="mb-6">
+              <h4 class="text-md font-medium text-white mb-2">Python</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`import requests
+
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "qwen",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Hello! How are you?"
+            }
+        ],
+        "temperature": 0.7
+    }
+)
+
+result = response.json()
+print(result["choices"][0]["message"]["content"])`}</code></pre>
+            </div>
+
+            <!-- JavaScript Code -->
+            <div id="chatJsCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">JavaScript</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`const response = await fetch('http://localhost:8000/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    model: 'qwen',
+    messages: [
+      {
+        role: 'user',
+        content: 'Hello! How are you?'
+      }
+    ],
+    temperature: 0.7
+  })
+});
+
+const result = await response.json();
+console.log(result.choices[0].message.content);`}</code></pre>
+            </div>
+
+            <!-- TypeScript Code -->
+            <div id="chatTsCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">TypeScript</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`interface ChatMessage {
+  role: string;
+  content: string;
+}
+
+interface ChatRequest {
+  model: string;
+  messages: ChatMessage[];
+  temperature?: number;
+}
+
+const response = await fetch('http://localhost:8000/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    model: 'qwen',
+    messages: [
+      {
+        role: 'user',
+        content: 'Hello! How are you?'
+      }
+    ],
+    temperature: 0.7
+  } as ChatRequest)
+});
+
+const result = await response.json() as any;
+console.log(result.choices[0].message.content);`}</code></pre>
+            </div>
+
+            <!-- Dart Code -->
+            <div id="chatDartCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">Dart</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+Future<void> main() async {
+  final response = await http.post(
+    Uri.parse('http://localhost:8000/v1/chat/completions'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer YOUR_API_KEY',
+    },
+    body: jsonEncode({
+      'model': 'qwen',
+      'messages': [
+        {
+          'role': 'user',
+          'content': 'Hello! How are you?'
+        }
+      ],
+      'temperature': 0.7
+    }),
+  );
+
+  final result = jsonDecode(response.body);
+  print(result['choices'][0]['message']['content']);
+}`}</code></pre>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- TASKS TAB -->
+      <div id="tasksContent" class="space-y-12 hidden">
+        <!-- EXTRACT -->
+        <section>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl text-white font-sans">Extract</h2>
+            <button
+              onclick="runExtract()"
+              class="px-6 py-3 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 shadow-lg font-medium transition-all"
+            >
+              Test Extract
+            </button>
+          </div>
+
+          <!-- Terminal UI -->
+          <div
+            class="glass-purple rounded-2xl p-6 shadow-2xl relative border border-white/20 font-mono text-sm mb-6"
+          >
+            <div class="flex items-center gap-2 mb-4 px-2">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              <span class="ml-2 text-gray-400 text-xs">extract</span>
+            </div>
+
+            <div class="space-y-4 text-gray-300 px-2 pb-2">
+              <!-- Endpoint Info -->
+              <div class="text-brand-blue">$ POST /v1/execute</div>
+
+              <!-- Request -->
+              <div>
+                <div class="text-gray-400 mb-2"># Request JSON:</div>
+                <pre
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">{`{
   "task": "extract",
   "input": {
     "text": "Invoice #42 from Bob for $500",
-    "schema": {"invoice": "number", "amount": "number"}
-  },
-  "config": {
-    "compress": true
+    "schema": {
+      "invoice_number": "number",
+      "customer": "string",
+      "amount": "number"
+    }
   }
-}`}</code>
-                </pre>
+}`}</pre>
+              </div>
 
-                <h3 class="text-lg font-semibold mb-2 mt-4 text-white">Check Performance Metrics</h3>
-                <ul class="list-disc pl-6 space-y-1 text-gray-300">
-                  <li>GET /v1/requests: List all processed job IDs</li>
-                  <li>GET /v1/requests/{`{id}`}/metrics: Retrieve detailed latency and token benchmarks</li>
-                </ul>
+              <!-- Response -->
+              <div>
+                <div class="text-gray-400 mb-2"># Response JSON:</div>
+                <pre
+                  id="extractResponse"
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">Click "Test" to see response...</pre>
+              </div>
+
+              <!-- Metrics -->
+              <div>
+                <div class="text-gray-400 mb-2"># Metrics:</div>
+                <pre
+                  id="extractMetrics"
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">TTFT: --ms | Tokens: -- | TPS: --</pre>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section id="tasks">
-            <div class="glass p-6 rounded-lg backdrop-blur-md border border-white/10">
-              <h2 class="text-2xl font-bold text-white mb-4">Available Tasks</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="glass p-4 rounded-lg backdrop-blur-md border border-white/10">
-                  <h3 class="font-semibold mb-2 text-white">Summarization</h3>
-                  <p class="text-sm text-gray-300">Condense long documents into key points</p>
-                </div>
-                <div class="glass p-4 rounded-lg backdrop-blur-md border border-white/10">
-                  <h3 class="font-semibold mb-2 text-white">Data Extraction</h3>
-                  <p class="text-sm text-gray-300">Extract structured data from unstructured text</p>
-                </div>
-                <div class="glass p-4 rounded-lg backdrop-blur-md border border-white/10">
-                  <h3 class="font-semibold mb-2 text-white">Classification</h3>
-                  <p class="text-sm text-gray-300">Categorize text into predefined classes</p>
-                </div>
-                <div class="glass p-4 rounded-lg backdrop-blur-md border border-white/10">
-                  <h3 class="font-semibold mb-2 text-white">Content Rewriting</h3>
-                  <p class="text-sm text-gray-300">Transform text while preserving meaning</p>
-                </div>
-                <div class="glass p-4 rounded-lg backdrop-blur-md border border-white/10">
-                  <h3 class="font-semibold mb-2 text-white">Code Generation</h3>
-                  <p class="text-sm text-gray-300">Generate code from natural language descriptions</p>
-                </div>
-                <div class="glass p-4 rounded-lg backdrop-blur-md border border-white/10">
-                  <h3 class="font-semibold mb-2 text-white">Translation</h3>
-                  <p class="text-sm text-gray-300">Translate text between multiple languages</p>
-                </div>
+          <!-- Code Snippets -->
+          <div
+            class="glass-purple rounded-2xl p-6 shadow-2xl relative border border-white/20"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-white">Code Snippets</h3>
+              <div class="flex space-x-2">
+                <button
+                  onclick="showCodeTab('extract', 'python')"
+                  id="extractPythonTab"
+                  class="px-3 py-1 text-sm bg-brand-purple text-white rounded hover:bg-brand-purple/90 transition-colors"
+                  >Python</button
+                >
+                <button
+                  onclick="showCodeTab('extract', 'javascript')"
+                  id="extractJsTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >JavaScript</button
+                >
+                <button
+                  onclick="showCodeTab('extract', 'typescript')"
+                  id="extractTsTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >TypeScript</button
+                >
+                <button
+                  onclick="showCodeTab('extract', 'dart')"
+                  id="extractDartTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >Dart</button
+                >
               </div>
             </div>
-          </section>
 
-          <section id="configuration">
-            <div class="glass p-6 rounded-lg backdrop-blur-md border border-white/10">
-              <h2 class="text-2xl font-bold text-white mb-4">Configuration</h2>
-              <div class="prose prose-gray max-w-none">
-                <p class="text-gray-300 mb-4">
-                  Varaha can be configured through environment variables and configuration files.
-                </p>
-                <h3 class="text-lg font-semibold mb-2 text-white">Environment Variables</h3>
-                <ul class="list-disc pl-6 space-y-1 text-gray-300">
-                  <li><code class="text-brand-purple">MODEL_PATH</code>: Path to your model files</li>
-                  <li><code class="text-brand-purple">BATCH_SIZE</code>: Maximum batch size for processing</li>
-                  <li><code class="text-brand-purple">MAX_TOKENS</code>: Maximum tokens per request</li>
-                  <li><code class="text-brand-purple">COMPRESSION_ENABLED</code>: Enable prompt compression</li>
-                </ul>
+            <!-- Python Code -->
+            <div id="extractPythonCode" class="mb-6">
+              <h4 class="text-md font-medium text-white mb-2">Python</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`import requests
+
+response = requests.post(
+    "http://localhost:8000/v1/execute",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "task": "extract",
+        "input": {
+            "text": "Invoice #42 from Bob for $500",
+            "schema": {
+                "invoice_number": "number",
+                "customer": "string",
+                "amount": "number"
+            }
+        }
+    }
+)
+
+result = response.json()
+print(result["data"])`}</code></pre>
+            </div>
+
+            <!-- JavaScript Code -->
+            <div id="extractJsCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">JavaScript</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`const response = await fetch('http://localhost:8000/v1/execute', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    task: 'extract',
+    input: {
+      text: 'Invoice #42 from Bob for $500',
+      schema: {
+        invoice_number: 'number',
+        customer: 'string',
+        amount: 'number'
+      }
+    }
+  })
+});
+
+const result = await response.json();
+console.log(result.data);`}</code></pre>
+            </div>
+
+            <!-- TypeScript Code -->
+            <div id="extractTsCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">TypeScript</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`interface ExtractRequest {
+  task: string;
+  input: {
+    text: string;
+    schema: {
+      invoice_number: number;
+      customer: string;
+      amount: number;
+    };
+  };
+}
+
+const response = await fetch('http://localhost:8000/v1/execute', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    task: 'extract',
+    input: {
+      text: 'Invoice #42 from Bob for $500',
+      schema: {
+        invoice_number: 'number',
+        customer: 'string',
+        amount: 'number'
+      }
+    }
+  } as ExtractRequest)
+});
+
+const result = await response.json() as any;
+console.log(result.data);`}</code></pre>
+            </div>
+
+            <!-- Dart Code -->
+            <div id="extractDartCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">Dart</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+Future<void> main() async {
+  final response = await http.post(
+    Uri.parse('http://localhost:8000/v1/execute'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer YOUR_API_KEY',
+    },
+    body: jsonEncode({
+      'task': 'extract',
+      'input': {
+        'text': 'Invoice #42 from Bob for \$500',
+        'schema': {
+          'invoice_number': 'number',
+          'customer': 'string',
+          'amount': 'number'
+        }
+      }
+    }),
+  );
+
+  final result = jsonDecode(response.body);
+  print(result['data']);
+}`}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- SUMMARIZE -->
+        <section>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl text-white font-sans">Summarize</h2>
+            <button
+              onclick="runSummarize()"
+              class="px-6 py-3 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 shadow-lg font-medium transition-all"
+            >
+              Test Summarize
+            </button>
+          </div>
+
+          <!-- Terminal UI -->
+          <div
+            class="glass-purple rounded-2xl p-6 shadow-2xl relative border border-white/20 font-mono text-sm mb-6"
+          >
+            <div class="flex items-center gap-2 mb-4 px-2">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              <span class="ml-2 text-gray-400 text-xs">summarize</span>
+            </div>
+
+            <div class="space-y-4 text-gray-300 px-2 pb-2">
+              <!-- Endpoint Info -->
+              <div class="text-brand-blue">$ POST /v1/execute</div>
+
+              <!-- Request -->
+              <div>
+                <div class="text-gray-400 mb-2"># Request JSON:</div>
+                <pre
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">{`{
+  "task": "summarize",
+  "input": {
+    "text": "Varaha is a platform that provides structured AI APIs for developers to build reliable automation workflows."
+  }
+}`}</pre>
+              </div>
+
+              <!-- Response -->
+              <div>
+                <div class="text-gray-400 mb-2"># Response JSON:</div>
+                <pre
+                  id="summarizeResponse"
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">Click "Test" to see response...</pre>
+              </div>
+
+              <!-- Metrics -->
+              <div>
+                <div class="text-gray-400 mb-2"># Metrics:</div>
+                <pre
+                  id="summarizeMetrics"
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">TTFT: --ms | Tokens: -- | TPS: --</pre>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section id="monitoring">
-            <div class="glass p-6 rounded-lg backdrop-blur-md border border-white/10">
-              <h2 class="text-2xl font-bold text-white mb-4">Monitoring</h2>
-              <div class="prose prose-gray max-w-none">
-                <p class="text-gray-300 mb-4">
-                  Varaha includes built-in monitoring capabilities to track performance and usage.
-                </p>
-                <h3 class="text-lg font-semibold mb-2 text-white">Metrics Available</h3>
-                <ul class="list-disc pl-6 space-y-1 text-gray-300">
-                  <li>TTFT (Time To First Token)</li>
-                  <li>Token counts per request</li>
-                  <li>TPS (Tokens Per Second)</li>
-                  <li>Batch processing efficiency</li>
-                  <li>Error rates and types</li>
-                </ul>
+          <!-- Code Snippets -->
+          <div
+            class="glass-purple rounded-2xl p-6 shadow-2xl relative border border-white/20"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-white">Code Snippets</h3>
+              <div class="flex space-x-2">
+                <button
+                  onclick="showCodeTab('summarize', 'python')"
+                  id="summarizePythonTab"
+                  class="px-3 py-1 text-sm bg-brand-purple text-white rounded hover:bg-brand-purple/90 transition-colors"
+                  >Python</button
+                >
+                <button
+                  onclick="showCodeTab('summarize', 'javascript')"
+                  id="summarizeJsTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >JavaScript</button
+                >
+                <button
+                  onclick="showCodeTab('summarize', 'typescript')"
+                  id="summarizeTsTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >TypeScript</button
+                >
+                <button
+                  onclick="showCodeTab('summarize', 'dart')"
+                  id="summarizeDartTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >Dart</button
+                >
               </div>
             </div>
-          </section>
-        </div>
+
+            <!-- Python Code -->
+            <div id="summarizePythonCode" class="mb-6">
+              <h4 class="text-md font-medium text-white mb-2">Python</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`import requests
+
+response = requests.post(
+    "http://localhost:8000/v1/execute",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "task": "summarize",
+        "input": {
+            "text": "Varaha is a platform that provides structured AI APIs for developers to build reliable automation workflows."
+        }
+    }
+)
+
+result = response.json()
+print(result["data"])`}</code></pre>
+            </div>
+
+            <!-- JavaScript Code -->
+            <div id="summarizeJsCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">JavaScript</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`const response = await fetch('http://localhost:8000/v1/execute', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    task: 'summarize',
+    input: {
+      text: 'Varaha is a platform that provides structured AI APIs for developers to build reliable automation workflows.'
+    }
+  })
+});
+
+const result = await response.json();
+console.log(result.data);`}</code></pre>
+            </div>
+
+            <!-- TypeScript Code -->
+            <div id="summarizeTsCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">TypeScript</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`interface SummarizeRequest {
+  task: string;
+  input: {
+    text: string;
+  };
+}
+
+const response = await fetch('http://localhost:8000/v1/execute', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    task: 'summarize',
+    input: {
+      text: 'Varaha is a platform that provides structured AI APIs for developers to build reliable automation workflows.'
+    }
+  } as SummarizeRequest)
+});
+
+const result = await response.json() as any;
+console.log(result.data);`}</code></pre>
+            </div>
+
+            <!-- Dart Code -->
+            <div id="summarizeDartCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">Dart</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+Future<void> main() async {
+  final response = await http.post(
+    Uri.parse('http://localhost:8000/v1/execute'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer YOUR_API_KEY',
+    },
+    body: jsonEncode({
+      'task': 'summarize',
+      'input': {
+        'text': 'Varaha is a platform that provides structured AI APIs for developers to build reliable automation workflows.'
+      }
+    }),
+  );
+
+  final result = jsonDecode(response.body);
+  print(result['data']);
+}`}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- CLASSIFY -->
+        <section>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl text-white font-sans">Classify</h2>
+            <button
+              onclick="runClassify()"
+              class="px-6 py-3 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 shadow-lg font-medium transition-all"
+            >
+              Test Classify
+            </button>
+          </div>
+
+          <!-- Terminal UI -->
+          <div
+            class="glass-purple rounded-2xl p-6 shadow-2xl relative border border-white/20 font-mono text-sm mb-6"
+          >
+            <div class="flex items-center gap-2 mb-4 px-2">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              <span class="ml-2 text-gray-400 text-xs">classify</span>
+            </div>
+
+            <div class="space-y-4 text-gray-300 px-2 pb-2">
+              <!-- Endpoint Info -->
+              <div class="text-brand-blue">$ POST /v1/execute</div>
+
+              <!-- Request -->
+              <div>
+                <div class="text-gray-400 mb-2"># Request JSON:</div>
+                <pre
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">{`{
+  "task": "classify",
+  "input": {
+    "text": "I want a refund immediately",
+    "labels": ["billing", "support", "general"]
+  }
+}`}</pre>
+              </div>
+
+              <!-- Response -->
+              <div>
+                <div class="text-gray-400 mb-2"># Response JSON:</div>
+                <pre
+                  id="classifyResponse"
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">Click "Test" to see response...</pre>
+              </div>
+
+              <!-- Metrics -->
+              <div>
+                <div class="text-gray-400 mb-2"># Metrics:</div>
+                <pre
+                  id="classifyMetrics"
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">TTFT: --ms | Tokens: -- | TPS: --</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Code Snippets -->
+          <div
+            class="glass-purple rounded-2xl p-6 shadow-2xl relative border border-white/20"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-white">Code Snippets</h3>
+              <div class="flex space-x-2">
+                <button
+                  onclick="showCodeTab('classify', 'python')"
+                  id="classifyPythonTab"
+                  class="px-3 py-1 text-sm bg-brand-purple text-white rounded hover:bg-brand-purple/90 transition-colors"
+                  >Python</button
+                >
+                <button
+                  onclick="showCodeTab('classify', 'javascript')"
+                  id="classifyJsTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >JavaScript</button
+                >
+                <button
+                  onclick="showCodeTab('classify', 'typescript')"
+                  id="classifyTsTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >TypeScript</button
+                >
+                <button
+                  onclick="showCodeTab('classify', 'dart')"
+                  id="classifyDartTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >Dart</button
+                >
+              </div>
+            </div>
+
+            <!-- Python Code -->
+            <div id="classifyPythonCode" class="mb-6">
+              <h4 class="text-md font-medium text-white mb-2">Python</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`import requests
+
+response = requests.post(
+    "http://localhost:8000/v1/execute",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "task": "classify",
+        "input": {
+            "text": "I want a refund immediately",
+            "labels": ["billing", "support", "general"]
+        }
+    }
+)
+
+result = response.json()
+print(result["data"])`}</code></pre>
+            </div>
+
+            <!-- JavaScript Code -->
+            <div id="classifyJsCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">JavaScript</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`const response = await fetch('http://localhost:8000/v1/execute', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    task: 'classify',
+    input: {
+      text: 'I want a refund immediately',
+      labels: ['billing', 'support', 'general']
+    }
+  })
+});
+
+const result = await response.json();
+console.log(result.data);`}</code></pre>
+            </div>
+
+            <!-- TypeScript Code -->
+            <div id="classifyTsCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">TypeScript</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`interface ClassifyRequest {
+  task: string;
+  input: {
+    text: string;
+    labels: string[];
+  };
+}
+
+const response = await fetch('http://localhost:8000/v1/execute', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    task: 'classify',
+    input: {
+      text: 'I want a refund immediately',
+      labels: ['billing', 'support', 'general']
+    }
+  } as ClassifyRequest)
+});
+
+const result = await response.json() as any;
+console.log(result.data);`}</code></pre>
+            </div>
+
+            <!-- Dart Code -->
+            <div id="classifyDartCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">Dart</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+Future<void> main() async {
+  final response = await http.post(
+    Uri.parse('http://localhost:8000/v1/execute'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer YOUR_API_KEY',
+    },
+    body: jsonEncode({
+      'task': 'classify',
+      'input': {
+        'text': 'I want a refund immediately',
+        'labels': ['billing', 'support', 'general']
+      }
+    }),
+  );
+
+  final result = jsonDecode(response.body);
+  print(result['data']);
+}`}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- REWRITE -->
+        <section>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl text-white font-sans">Rewrite</h2>
+            <button
+              onclick="runRewrite()"
+              class="px-6 py-3 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 shadow-lg font-medium transition-all"
+            >
+              Test Rewrite
+            </button>
+          </div>
+
+          <!-- Terminal UI -->
+          <div
+            class="glass-purple rounded-2xl p-6 shadow-2xl relative border border-white/20 font-mono text-sm mb-6"
+          >
+            <div class="flex items-center gap-2 mb-4 px-2">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              <span class="ml-2 text-gray-400 text-xs">rewrite</span>
+            </div>
+
+            <div class="space-y-4 text-gray-300 px-2 pb-2">
+              <!-- Endpoint Info -->
+              <div class="text-brand-blue">$ POST /v1/execute</div>
+
+              <!-- Request -->
+              <div>
+                <div class="text-gray-400 mb-2"># Request JSON:</div>
+                <pre
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">{`{
+  "task": "rewrite",
+  "input": {
+    "text": "pls fix this asap bro",
+    "tone": "professional"
+  }
+}`}</pre>
+              </div>
+
+              <!-- Response -->
+              <div>
+                <div class="text-gray-400 mb-2"># Response JSON:</div>
+                <pre
+                  id="rewriteResponse"
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">Click "Test" to see response...</pre>
+              </div>
+
+              <!-- Metrics -->
+              <div>
+                <div class="text-gray-400 mb-2"># Metrics:</div>
+                <pre
+                  id="rewriteMetrics"
+                  class="bg-black/50 p-3 rounded border border-white/10 text-xs">TTFT: --ms | Tokens: -- | TPS: --</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Code Snippets -->
+          <div
+            class="glass-purple rounded-2xl p-6 shadow-2xl relative border border-white/20"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-white">Code Snippets</h3>
+              <div class="flex space-x-2">
+                <button
+                  onclick="showCodeTab('rewrite', 'python')"
+                  id="rewritePythonTab"
+                  class="px-3 py-1 text-sm bg-brand-purple text-white rounded hover:bg-brand-purple/90 transition-colors"
+                  >Python</button
+                >
+                <button
+                  onclick="showCodeTab('rewrite', 'javascript')"
+                  id="rewriteJsTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >JavaScript</button
+                >
+                <button
+                  onclick="showCodeTab('rewrite', 'typescript')"
+                  id="rewriteTsTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >TypeScript</button
+                >
+                <button
+                  onclick="showCodeTab('rewrite', 'dart')"
+                  id="rewriteDartTab"
+                  class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  >Dart</button
+                >
+              </div>
+            </div>
+
+            <!-- Python Code -->
+            <div id="rewritePythonCode" class="mb-6">
+              <h4 class="text-md font-medium text-white mb-2">Python</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`import requests
+
+response = requests.post(
+    "http://localhost:8000/v1/execute",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "task": "rewrite",
+        "input": {
+            "text": "pls fix this asap bro",
+            "tone": "professional"
+        }
+    }
+)
+
+result = response.json()
+print(result["data"])`}</code></pre>
+            </div>
+
+            <!-- JavaScript Code -->
+            <div id="rewriteJsCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">JavaScript</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`const response = await fetch('http://localhost:8000/v1/execute', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    task: 'rewrite',
+    input: {
+      text: 'pls fix this asap bro',
+      tone: 'professional'
+    }
+  })
+});
+
+const result = await response.json();
+console.log(result.data);`}</code></pre>
+            </div>
+
+            <!-- TypeScript Code -->
+            <div id="rewriteTsCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">TypeScript</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`interface RewriteRequest {
+  task: string;
+  input: {
+    text: string;
+    tone: string;
+  };
+}
+
+const response = await fetch('http://localhost:8000/v1/execute', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    task: 'rewrite',
+    input: {
+      text: 'pls fix this asap bro',
+      tone: 'professional'
+    }
+  } as RewriteRequest)
+});
+
+const result = await response.json() as any;
+console.log(result.data);`}</code></pre>
+            </div>
+
+            <!-- Dart Code -->
+            <div id="rewriteDartCode" class="mb-6 hidden">
+              <h4 class="text-md font-medium text-white mb-2">Dart</h4>
+              <pre
+                class="bg-black/50 p-3 rounded border border-white/10 text-xs overflow-x-auto"><code class="text-green-400">{`import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+Future<void> main() async {
+  final response = await http.post(
+    Uri.parse('http://localhost:8000/v1/execute'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer YOUR_API_KEY',
+    },
+    body: jsonEncode({
+      'task': 'rewrite',
+      'input': {
+        'text': 'pls fix this asap bro',
+        'tone': 'professional'
+      }
+    }),
+  );
+
+  final result = jsonDecode(response.body);
+  print(result['data']);
+}`}</code></pre>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </main>
+
+  <!-- CLIENT SCRIPT -->
+  <script>
+    import { authService } from "../lib/auth.ts";
+
+    // auth guard
+    if (!authService.isAuthenticated()) {
+      window.location.href = "/login";
+    }
+
+    // Logout handler
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        authService.logout();
+        window.location.reload();
+      });
+    }
+
+    let apiKey = "vk_live_test_key";
+
+    async function init() {
+      try {
+        const res = await authService.fetchWithAuth(
+          "http://localhost:8000/v1/admin/keys",
+        );
+        const data = await res.json();
+        if (data.keys?.length) {
+          apiKey = data.keys[0].key;
+        }
+      } catch {}
+    }
+
+    function showTab(tab) {
+      const chatContent = document.getElementById("chatContent");
+      const tasksContent = document.getElementById("tasksContent");
+
+      const chatTab = document.getElementById("chatTab");
+      const tasksTab = document.getElementById("tasksTab");
+
+      if (tab === "chat") {
+        chatContent.classList.remove("hidden");
+        tasksContent.classList.add("hidden");
+
+        chatTab.classList.add("text-white", "border-brand-purple");
+        chatTab.classList.remove("text-gray-300");
+
+        tasksTab.classList.remove("text-white", "border-brand-purple");
+        tasksTab.classList.add("text-gray-300");
+      } else {
+        chatContent.classList.add("hidden");
+        tasksContent.classList.remove("hidden");
+
+        tasksTab.classList.add("text-white", "border-brand-purple");
+        tasksTab.classList.remove("text-gray-300");
+
+        chatTab.classList.remove("text-white", "border-brand-purple");
+        chatTab.classList.add("text-gray-300");
+      }
+    }
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function capitalizeShort(str) {
+      if (str === "javascript") return "Js";
+      if (str === "typescript") return "Ts";
+      if (str === "dart") return "Dart";
+      return "Python";
+    }
+    function showCodeTab(section, lang) {
+      const langs = ["python", "javascript", "typescript", "dart"];
+
+      langs.forEach((l) => {
+        const code = document.getElementById(`${section}${capitalize(l)}Code`);
+        const tab = document.getElementById(
+          `${section}${capitalizeShort(l)}Tab`,
+        );
+
+        if (code) code.classList.add("hidden");
+        if (tab) tab.classList.remove("bg-brand-purple");
+      });
+
+      const activeCode = document.getElementById(
+        `${section}${capitalize(lang)}Code`,
+      );
+      const activeTab = document.getElementById(
+        `${section}${capitalizeShort(lang)}Tab`,
+      );
+
+      if (activeCode) activeCode.classList.remove("hidden");
+      if (activeTab) activeTab.classList.add("bg-brand-purple");
+    }
+
+    async function callAPI(body: any) {
+      const res = await fetch("http://localhost:8000/v1/execute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      return await res.json();
+    }
+    async function runChat() {
+      const responseEl = document.getElementById("chatResponse");
+      const metricsEl = document.getElementById("chatMetrics");
+
+      if (!responseEl || !metricsEl) return;
+
+      responseEl.textContent = "Loading...";
+      metricsEl.textContent = "TTFT: --ms | Tokens: -- | TPS: --";
+
+      try {
+        const res = await fetch("http://localhost:8000/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: "qwen",
+            messages: [{ role: "user", content: "Hello! How are you?" }],
+            temperature: 0.7,
+          }),
+        });
+
+        const data = await res.json();
+        responseEl.textContent = JSON.stringify(data, null, 2);
+
+        // Update metrics if available
+        if (data.usage) {
+          metricsEl.textContent = `TTFT: --ms | Tokens: ${data.usage.total_tokens} | TPS: --`;
+        }
+      } catch {
+        responseEl.textContent = "Error: Failed to connect to API";
+      }
+    }
+
+    async function runExtract() {
+      const responseEl = document.getElementById("extractResponse");
+      const metricsEl = document.getElementById("extractMetrics");
+
+      if (!responseEl || !metricsEl) return;
+
+      responseEl.textContent = "Loading...";
+      metricsEl.textContent = "TTFT: --ms | Tokens: -- | TPS: --";
+
+      try {
+        const data = await callAPI({
+          task: "extract",
+          input: {
+            text: "Invoice #42 from Bob for $500",
+            schema: {
+              invoice_number: "number",
+              customer: "string",
+              amount: "number",
+            },
+          },
+        });
+
+        responseEl.textContent = JSON.stringify(data, null, 2);
+
+        // Update metrics if available
+        if (data.metrics) {
+          const totalTokens =
+            (data.metrics.input_tokens || 0) +
+            (data.metrics.output_tokens || 0);
+          metricsEl.textContent = `TTFT: ${data.metrics.ttft_ms || "--"}ms | Tokens: ${totalTokens} | TPS: ${data.metrics.tps || "--"}`;
+        }
+      } catch {
+        responseEl.textContent = "Error: Failed to connect to API";
+      }
+    }
+
+    async function runSummarize() {
+      const responseEl = document.getElementById("summarizeResponse");
+      const metricsEl = document.getElementById("summarizeMetrics");
+
+      if (!responseEl || !metricsEl) return;
+
+      responseEl.textContent = "Loading...";
+      metricsEl.textContent = "TTFT: --ms | Tokens: -- | TPS: --";
+
+      try {
+        const data = await callAPI({
+          task: "summarize",
+          input: {
+            text: "Varaha is a platform that provides structured AI APIs for developers to build reliable automation workflows.",
+          },
+        });
+
+        responseEl.textContent = JSON.stringify(data, null, 2);
+
+        // Update metrics if available
+        if (data.metrics) {
+          const totalTokens =
+            (data.metrics.input_tokens || 0) +
+            (data.metrics.output_tokens || 0);
+          metricsEl.textContent = `TTFT: ${data.metrics.ttft_ms || "--"}ms | Tokens: ${totalTokens} | TPS: ${data.metrics.tps || "--"}`;
+        }
+      } catch {
+        responseEl.textContent = "Error: Failed to connect to API";
+      }
+    }
+
+    async function runClassify() {
+      const responseEl = document.getElementById("classifyResponse");
+      const metricsEl = document.getElementById("classifyMetrics");
+
+      if (!responseEl || !metricsEl) return;
+
+      responseEl.textContent = "Loading...";
+      metricsEl.textContent = "TTFT: --ms | Tokens: -- | TPS: --";
+
+      try {
+        const data = await callAPI({
+          task: "classify",
+          input: {
+            text: "I want a refund immediately",
+            labels: ["billing", "support", "general"],
+          },
+        });
+
+        responseEl.textContent = JSON.stringify(data, null, 2);
+
+        // Update metrics if available
+        if (data.metrics) {
+          const totalTokens =
+            (data.metrics.input_tokens || 0) +
+            (data.metrics.output_tokens || 0);
+          metricsEl.textContent = `TTFT: ${data.metrics.ttft_ms || "--"}ms | Tokens: ${totalTokens} | TPS: ${data.metrics.tps || "--"}`;
+        }
+      } catch {
+        responseEl.textContent = "Error: Failed to connect to API";
+      }
+    }
+
+    async function runRewrite() {
+      const responseEl = document.getElementById("rewriteResponse");
+      const metricsEl = document.getElementById("rewriteMetrics");
+
+      if (!responseEl || !metricsEl) return;
+
+      responseEl.textContent = "Loading...";
+      metricsEl.textContent = "TTFT: --ms | Tokens: -- | TPS: --";
+
+      try {
+        const data = await callAPI({
+          task: "rewrite",
+          input: {
+            text: "pls fix this asap bro",
+            tone: "professional",
+          },
+        });
+
+        responseEl.textContent = JSON.stringify(data, null, 2);
+
+        // Update metrics if available
+        if (data.metrics) {
+          const totalTokens =
+            (data.metrics.input_tokens || 0) +
+            (data.metrics.output_tokens || 0);
+          metricsEl.textContent = `TTFT: ${data.metrics.ttft_ms || "--"}ms | Tokens: ${totalTokens} | TPS: ${data.metrics.tps || "--"}`;
+        }
+      } catch {
+        responseEl.textContent = "Error: Failed to connect to API";
+      }
+    }
+
+    init();
+
+    (window as any).runExtract = runExtract;
+    (window as any).runSummarize = runSummarize;
+    (window as any).runClassify = runClassify;
+    (window as any).runRewrite = runRewrite;
+    (window as any).runChat = runChat;
+    (window as any).showTab = showTab;
+    (window as any).showCodeTab = showCodeTab;
+  </script>
 </Layout>

@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro'
 import { authService } from '../lib/auth.ts'
-import { Key, Copy, Eye, BarChart3, Zap, Settings, X, Upload, Download, Trash } from 'lucide-astro'
+import { Key, Copy, Eye, BarChart3, Zap, Settings, X, Upload, Download, Trash, FileText, Save } from 'lucide-astro'
 const isAuthenticated = authService.isAuthenticated()
 ---
 
@@ -15,9 +15,7 @@ const isAuthenticated = authService.isAuthenticated()
             <span class="text-2xl font-semibold text-white tracking-widest transform -translate-x-5">varaha<span class="text-brand-purple">.ai</span></span>
           </a>
           <div class="hidden md:flex space-x-6">
-            <a href="/docs" class="text-gray-300 hover:text-white transition-colors">Docs</a>
-            <a href="/pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
-            <a href="/dashboard" class="text-white font-medium">Dashboard</a>
+            <a href="/docs" class="text-white font-medium">📚 API Docs</a>
             <a href="/api-test" class="text-gray-300 hover:text-white transition-colors">API Test</a>
           </div>
         </div>
@@ -165,6 +163,7 @@ const isAuthenticated = authService.isAuthenticated()
             </div>
             <div class="flex justify-end md:justify-start gap-4">
               <button class="px-4 py-1.5 glass rounded border border-white/10 text-sm text-gray-300 hover:text-white transition-colors flex items-center gap-2 min-w-[140px] overflow-hidden" onclick="showLogsModal('${k.key}')"><Eye class="w-4 h-4 flex-shrink-0" /> <span class="truncate">View Logs & Usage</span></button>
+              <button class="px-4 py-1.5 glass rounded border border-white/10 text-sm text-gray-300 hover:text-white transition-colors flex items-center gap-2 min-w-[100px] overflow-hidden" onclick="showSettingsModal('${k.key}')"><span class="truncate">Settings</span></button>
               <button class="p-1.5 glass rounded border border-red-500/30 text-red-400 hover:text-red-300 hover:border-red-500/50 transition-all hover:scale-110 relative" onclick="deleteKey('${k.key}', this)" title="Delete Key">
   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
     <path d="M3 6h18"></path>
@@ -253,6 +252,81 @@ const isAuthenticated = authService.isAuthenticated()
         } finally {
           btn.disabled = false;
           btn.textContent = 'Generate Key';
+        }
+      });
+    }
+
+    // Show Settings Modal
+    async function showSettingsModal(apiKey) {
+      const modal = document.getElementById('settingsModal');
+      const content = document.getElementById('settingsContent');
+      
+      modal.classList.remove('hidden');
+      content.innerHTML = '<div class="text-center py-8 text-gray-400">Loading key settings...</div>';
+      
+      try {
+        // Get fresh key data from API to ensure accuracy
+        const res = await authService.fetchWithAuth('http://localhost:8000/v1/admin/keys');
+        if (res.ok) {
+          const data = await res.json();
+          const keyData = data.keys.find(k => k.key === apiKey);
+          
+          if (keyData) {
+            renderSettingsForm(apiKey, keyData);
+          } else {
+            content.innerHTML = '<div class="text-center py-8 text-red-400">Key not found.</div>';
+          }
+        } else {
+          content.innerHTML = '<div class="text-center py-8 text-red-400">Failed to load key data.</div>';
+        }
+      } catch (err) {
+        content.innerHTML = '<div class="text-center py-8 text-red-400">Error loading settings.</div>';
+      }
+    }
+
+    // Render Settings Form
+    function renderSettingsForm(apiKey, keyData) {
+      const content = document.getElementById('settingsContent');
+      
+      // Build HTML in parts to avoid formatting issues
+      const headerHtml = `<div class="flex items-center gap-3 pb-4 border-b border-white/10"><div><h3 class="text-lg font-bold text-white">${keyData.name}</h3><div class="text-sm font-mono text-gray-500">${keyData.key}</div></div><span class="px-2 py-1 rounded text-xs bg-brand-purple/20 text-brand-purple border border-brand-purple/30">${keyData.model_id}</span></div>`;
+      
+      const formHtml = `<form id="settings-form-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}" class="space-y-6"><div class="grid md:grid-cols-2 gap-6"><div><label class="block text-sm text-gray-300 mb-2">Key Alias</label><input type="text" id="settings-name-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}" value="${keyData.name}" class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple"></div><div><label class="block text-sm text-gray-300 mb-2">Model Routing</label><select id="settings-model-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}" class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple"><option value="qwen" ${keyData.model_id === 'qwen' ? 'selected' : ''}>Qwen 1.5B Turbo (Fast)</option><option value="tinyllama" ${keyData.model_id === 'tinyllama' ? 'selected' : ''}>TinyLlama 1.1B Eco</option></select></div></div><div><label class="block text-sm text-gray-300 mb-2">System Instructions</label><textarea id="settings-system-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}" rows="4" placeholder="Embed context like: 'You are a helpful assistant...'" class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple">${(keyData.system_prompt || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea><p class="text-xs text-gray-500 mt-2">These instructions are automatically prepended to every request using this key.</p></div><div><div class="flex justify-between items-center mb-2"><label class="block text-sm text-gray-300">Temperature: <span id="settings-temp-val-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}">${keyData.temperature}</span></label></div><input type="range" id="settings-temp-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}" min="0" max="1" step="0.1" value="${keyData.temperature}" class="w-full accent-brand-purple h-2 bg-black/30 rounded-lg appearance-none cursor-pointer" oninput="document.getElementById('settings-temp-val-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}').innerText = this.value"></div><div class="grid md:grid-cols-2 gap-6 p-4 bg-black/20 rounded-lg border border-white/10"><div><h4 class="text-sm font-semibold text-brand-blue mb-2 flex items-center">Current System Prompt</h4><div class="p-3 bg-black/30 rounded border border-white/10"><div class="text-xs text-gray-300">${(keyData.system_prompt || 'No system prompt configured').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div></div></div><div><h4 class="text-sm font-semibold text-brand-purple mb-2 flex items-center">RAG Status</h4><div class="p-3 bg-black/30 rounded border border-white/10"><div class="text-xs text-gray-300">${keyData.has_rag ? 'RAG data attached' : 'No RAG data configured'}</div></div></div></div><div id="settings-error-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}" class="hidden text-red-400 text-sm"></div><div class="flex justify-end gap-3 pt-4 border-t border-white/10"><button type="button" class="px-5 py-2.5 text-gray-300 hover:text-white transition-colors" onclick="document.getElementById('settingsModal').classList.add('hidden')">Cancel</button><button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg shadow-lg font-medium hover:opacity-90 transition-all flex items-center gap-2">Save Changes</button></div></form>`;
+      
+      content.innerHTML = `<div class="space-y-6">${headerHtml}${formHtml}</div>`;
+
+      // Add form submission handler
+      const form = document.getElementById(`settings-form-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`);
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const errorDiv = document.getElementById(`settings-error-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`);
+        
+        const payload = {
+          name: document.getElementById(`settings-name-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`).value,
+          model_id: document.getElementById(`settings-model-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`).value,
+          system_prompt: document.getElementById(`settings-system-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`).value,
+          temperature: parseFloat(document.getElementById(`settings-temp-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`).value)
+        };
+        
+        try {
+          const res = await authService.fetchWithAuth(`http://localhost:8000/v1/admin/keys/${encodeURIComponent(apiKey)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          
+          if (res.ok) {
+            showToast('Settings updated successfully!');
+            document.getElementById('settingsModal').classList.add('hidden');
+            loadKeys(); // Reload the keys to show updated info
+          } else {
+            errorDiv.textContent = 'Failed to update settings. Please try again.';
+            errorDiv.classList.remove('hidden');
+          }
+        } catch (error) {
+          errorDiv.textContent = 'Network error. Please check your connection.';
+          errorDiv.classList.remove('hidden');
         }
       });
     }
@@ -563,12 +637,31 @@ const isAuthenticated = authService.isAuthenticated()
 
     // Make functions globally accessible
     window.showLogsModal = showLogsModal;
+    window.showSettingsModal = showSettingsModal;
     window.toggleJsonSection = toggleJsonSection;
     window.forgeNewKey = forgeNewKey;
     window.saveKeyWithAnimation = saveKeyWithAnimation;
     window.generateKeyWithAnimation = generateKeyWithAnimation;
     window.deleteKey = deleteKey;
   </script>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="glass-enhanced rounded-2xl border border-white/10 w-full max-w-4xl max-h-[80vh] overflow-hidden shadow-2xl">
+      <div class="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+        <h2 class="text-xl font-bold text-white flex items-center">
+          <Settings class="w-5 h-5 mr-2 text-brand-purple" />
+          API Key Settings
+        </h2>
+        <button class="text-gray-400 hover:text-white" onclick="document.getElementById('settingsModal').classList.add('hidden')"><X class="w-5 h-5" /></button>
+      </div>
+      <div id="settingsContent" class="p-6 overflow-y-auto max-h-[60vh] overscroll-contain">
+        <div class="text-center py-8 text-gray-400">
+          Loading settings...
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Logs Modal -->
   <div id="logsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

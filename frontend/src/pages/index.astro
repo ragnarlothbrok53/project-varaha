@@ -15,9 +15,9 @@ const isAuthenticated = authService.isAuthenticated()
             <span class="text-2xl font-semibold text-white tracking-widest transform -translate-x-5">varaha<span class="text-brand-purple">.ai</span></span>
           </a>
           <div class="hidden md:flex space-x-6">
-            <a href="/docs" class="text-gray-300 hover:text-white transition-colors">Docs</a>
             <a href="/pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
             <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+            <a href="/terms" class="text-gray-300 hover:text-white transition-colors">Terms</a>
           </div>
         </div>
         <div class="flex items-center space-x-4">
@@ -124,8 +124,9 @@ const isAuthenticated = authService.isAuthenticated()
   <script>
     import { authService } from '../lib/auth.ts';
     
-    if (document.getElementById('logoutBtn')) {
-      document.getElementById('logoutBtn').addEventListener('click', () => {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
         authService.logout();
         window.location.reload();
       });

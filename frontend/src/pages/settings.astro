@@ -1,99 +1,55 @@
 ---
 import Layout from '../layouts/Layout.astro'
 import { authService } from '../lib/auth.ts'
-const user = authService.getUser()
+import { Settings, Key, Save, X, Upload, FileText, Trash2, Edit2, Check } from 'lucide-astro'
+const isAuthenticated = authService.isAuthenticated()
 ---
 
-<Layout title="Settings - Varaha">
-  <nav class="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+<Layout title="API Key Settings - Varaha">
+  <nav class="border-b border-white/10 glass backdrop-blur-md">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between">
         <div class="flex items-center space-x-8">
-          <a href="/" class="flex items-center space-x-2">
-            <span class="text-2xl font-bold text-primary-600">Varaha</span>
+          <a href="/" class="flex items-center space-x-2 relative">
+            <img src="/mandala2.svg" alt="Varaha Logo" class="w-10 h-10 object-contain scale-110 opacity-40 animate-spin animate-duration-1000" style="filter: brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(15deg) brightness(1.2);" />
+            <span class="text-2xl font-semibold text-white tracking-widest transform -translate-x-5">varaha<span class="text-brand-purple">.ai</span></span>
           </a>
           <div class="hidden md:flex space-x-6">
-            <a href="/docs" class="text-gray-600 hover:text-gray-900">Docs</a>
-            <a href="/pricing" class="text-gray-600 hover:text-gray-900">Pricing</a>
-            <a href="/dashboard" class="text-gray-600 hover:text-gray-900">Dashboard</a>
+            <a href="/docs" class="text-gray-300 hover:text-white transition-colors">Docs</a>
+            <a href="/pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
+            <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+            <a href="/settings" class="text-white font-medium">Settings</a>
           </div>
         </div>
         <div class="flex items-center space-x-4">
-          <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-600">{user?.name || 'User'}</span>
-            <button 
-              id="logoutBtn"
-              class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
-            >
-              Logout
-            </button>
-          </div>
+          <button 
+            id="logoutBtn"
+            class="px-4 py-2 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-colors text-white"
+          >
+            Logout
+          </button>
         </div>
       </div>
     </div>
   </nav>
 
-  <main class="py-8">
-    <div class="container mx-auto px-4 max-w-4xl">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-        <p class="text-gray-600">Manage your account settings and preferences</p>
+  <main class="py-12">
+    <div class="container mx-auto px-4 max-w-6xl">
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-8 border-b border-white/10">
+        <div>
+          <h1 class="text-3xl font-bold text-white mb-2 flex items-center">
+            <Settings class="w-8 h-8 mr-3 text-brand-purple" />
+            API Key Settings
+          </h1>
+          <p class="text-gray-400">Configure system prompts, RAG data, and other intelligent key settings.</p>
+        </div>
       </div>
 
-      <div class="bg-white rounded-lg border">
-        <div class="p-6 border-b">
-          <h2 class="text-xl font-semibold mb-4">Profile Information</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-              <input
-                type="text"
-                value={user?.name || ''}
-                class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                readonly
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                value={user?.email || ''}
-                class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                readonly
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="p-6 border-b">
-          <h2 class="text-xl font-semibold mb-4">API Keys</h2>
-          <p class="text-gray-600 mb-4">Manage your API credentials for accessing the Varaha API</p>
-          <button class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
-            Generate New API Key
-          </button>
-        </div>
-
-        <div class="p-6 border-b">
-          <h2 class="text-xl font-semibold mb-4">Team Management</h2>
-          <p class="text-gray-600 mb-4">Invite team members and manage permissions</p>
-          <div class="space-y-2">
-            <a href="/teams" class="text-primary-600 hover:underline">View Teams →</a>
-            <br>
-            <a href="/teams/new" class="text-primary-600 hover:underline">Create New Team →</a>
-          </div>
-        </div>
-
-        <div class="p-6">
-          <h2 class="text-xl font-semibold mb-4">Danger Zone</h2>
-          <div class="space-y-4">
-            <div>
-              <h3 class="font-medium text-gray-900 mb-1">Delete Account</h3>
-              <p class="text-sm text-gray-600 mb-2">Permanently delete your account and all associated data</p>
-              <button class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50">
-                Delete Account
-              </button>
-            </div>
-          </div>
+      <!-- Keys Settings Grid -->
+      <div id="settingsGrid" class="grid gap-6">
+        <div class="text-center py-8 text-gray-400">
+          Loading API keys...
         </div>
       </div>
     </div>
@@ -101,10 +57,274 @@ const user = authService.getUser()
 
   <script>
     import { authService } from '../lib/auth.ts';
-
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      authService.logout();
+    
+    // Auth Guard
+    if (!authService.isAuthenticated()) {
       window.location.href = '/login';
+    }
+
+    if (document.getElementById('logoutBtn')) {
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        authService.logout();
+        window.location.href = '/login';
+      });
+    }
+
+    // Dynamic Rendering
+    const settingsGrid = document.getElementById('settingsGrid');
+    
+    async function loadKeys() {
+      try {
+        const res = await authService.fetchWithAuth('http://localhost:8000/v1/admin/keys');
+        if (res.ok) {
+          const data = await res.json();
+          renderKeySettings(data.keys);
+        } else {
+          settingsGrid.innerHTML = `<div class="text-red-400 text-center py-8">Failed to load keys.</div>`;
+        }
+      } catch (err) {
+        settingsGrid.innerHTML = `<div class="text-red-400 text-center py-8">Connection error.</div>`;
+      }
+    }
+
+    function renderKeySettings(keys) {
+      if (!keys || keys.length === 0) {
+        settingsGrid.innerHTML = `
+          <div class="text-center py-12">
+            <div class="text-gray-400 mb-4">No API keys found.</div>
+            <a href="/dashboard" class="px-6 py-3 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 shadow-lg font-medium transition-all inline-block">
+              Create Your First Key
+            </a>
+          </div>
+        `;
+        return;
+      }
+      
+      settingsGrid.innerHTML = keys.map(k => `
+        <div class="glass-enhanced p-6 rounded-xl border border-white/10" data-key-id="${k.key}">
+          <div class="flex flex-col lg:flex-row justify-between items-start gap-6">
+            <!-- Key Info Section -->
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-4">
+                <Key class="w-5 h-5 text-brand-purple" />
+                <h3 class="text-xl font-bold text-white">${k.name}</h3>
+                <span class="px-2 py-1 rounded text-xs bg-brand-purple/20 text-brand-purple border border-brand-purple/30">${k.model_id}</span>
+                <span class="px-2 py-1 rounded text-xs ${k.active ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">${k.active ? 'Active' : 'Inactive'}</span>
+              </div>
+              <div class="text-sm font-mono text-gray-500 mb-4 flex items-center gap-2">
+                ${k.key} 
+                <button class="hover:text-white transition-colors" onclick="navigator.clipboard.writeText('${k.key}'); showToast('Key copied to clipboard!')">
+                  <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Actions Section -->
+            <div class="flex gap-3">
+              <button 
+                id="edit-btn-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}"
+                class="px-4 py-2 glass rounded border border-white/10 text-sm text-gray-300 hover:text-white hover:border-brand-purple/50 transition-all flex items-center gap-2"
+                onclick="toggleEditMode('${k.key}')"
+              >
+                <Edit2 class="w-4 h-4" />
+                Edit Settings
+              </button>
+            </div>
+          </div>
+
+          <!-- Settings Display Section (Read-only) -->
+          <div id="display-section-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}" class="mt-6 pt-6 border-t border-white/5">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <h4 class="text-sm font-semibold text-white mb-3 flex items-center">
+                  <FileText class="w-4 h-4 mr-2 text-brand-blue" />
+                  System Prompt
+                </h4>
+                <div class="p-3 bg-black/20 rounded-lg border border-white/10">
+                  <div class="text-sm text-gray-300 whitespace-pre-wrap">${k.system_prompt || 'No system prompt configured'}</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold text-white mb-3 flex items-center">
+                  <Upload class="w-4 h-4 mr-2 text-brand-purple" />
+                  RAG Knowledge Base
+                </h4>
+                <div class="p-3 bg-black/20 rounded-lg border border-white/10">
+                  <div class="text-sm text-gray-300">${k.has_rag ? 'RAG data attached' : 'No RAG data configured'}</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-4">
+              <h4 class="text-sm font-semibold text-white mb-3">Model Configuration</h4>
+              <div class="flex gap-6 text-sm">
+                <div>
+                  <span class="text-gray-400">Temperature:</span>
+                  <span class="text-white ml-2 font-mono">${k.temperature}</span>
+                </div>
+                <div>
+                  <span class="text-gray-400">Model:</span>
+                  <span class="text-white ml-2 font-mono">${k.model_id}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings Edit Section (Hidden by default) -->
+          <div id="edit-section-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}" class="hidden mt-6 pt-6 border-t border-white/5">
+            <form id="edit-form-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}" class="space-y-6">
+              <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm text-gray-300 mb-2">Key Alias</label>
+                  <input 
+                    type="text" 
+                    id="edit-name-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}"
+                    value="${k.name}" 
+                    class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple"
+                  >
+                </div>
+                <div>
+                  <label class="block text-sm text-gray-300 mb-2">Model Routing</label>
+                  <select 
+                    id="edit-model-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}"
+                    class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple"
+                  >
+                    <option value="qwen" ${k.model_id === 'qwen' ? 'selected' : ''}>Qwen 1.5B Turbo (Fast)</option>
+                    <option value="tinyllama" ${k.model_id === 'tinyllama' ? 'selected' : ''}>TinyLlama 1.1B Eco</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm text-gray-300 mb-2">System Instructions</label>
+                <textarea 
+                  id="edit-system-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}"
+                  rows="4" 
+                  placeholder="Embed context like: 'You are a helpful assistant...'"
+                  class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple"
+                >${k.system_prompt || ''}</textarea>
+                <p class="text-xs text-gray-500 mt-2">These instructions are automatically prepended to every request using this key.</p>
+              </div>
+              
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <label class="block text-sm text-gray-300">Temperature: <span id="edit-temp-val-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}">${k.temperature}</span></label>
+                </div>
+                <input 
+                  type="range" 
+                  id="edit-temp-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}"
+                  min="0" max="1" step="0.1" value="${k.temperature}" 
+                  class="w-full accent-brand-purple h-2 bg-black/30 rounded-lg appearance-none cursor-pointer" 
+                  oninput="document.getElementById('edit-temp-val-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}').innerText = this.value"
+                >
+              </div>
+
+              <div id="edit-error-${k.key.replace(/[^a-zA-Z0-9]/g, '_')}" class="hidden text-red-400 text-sm"></div>
+
+              <div class="flex justify-end gap-3">
+                <button 
+                  type="button" 
+                  class="px-5 py-2.5 text-gray-300 hover:text-white transition-colors" 
+                  onclick="toggleEditMode('${k.key}')"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  class="px-6 py-2.5 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg shadow-lg font-medium hover:opacity-90 transition-all flex items-center gap-2"
+                >
+                  <Save class="w-4 h-4" />
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Toggle Edit Mode
+    function toggleEditMode(apiKey) {
+      const displaySection = document.getElementById(`display-section-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`);
+      const editSection = document.getElementById(`edit-section-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`);
+      const editBtn = document.getElementById(`edit-btn-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`);
+      
+      if (editSection.classList.contains('hidden')) {
+        // Show edit mode
+        displaySection.classList.add('hidden');
+        editSection.classList.remove('hidden');
+        editBtn.innerHTML = '<X class="w-4 h-4" /> Cancel';
+        editBtn.classList.add('border-red-500/30', 'text-red-400');
+      } else {
+        // Hide edit mode
+        displaySection.classList.remove('hidden');
+        editSection.classList.add('hidden');
+        editBtn.innerHTML = '<Edit2 class="w-4 h-4" /> Edit Settings';
+        editBtn.classList.remove('border-red-500/30', 'text-red-400');
+      }
+    }
+
+    // Handle form submissions
+    document.addEventListener('submit', async (e) => {
+      if (!e.target.id || !e.target.id.startsWith('edit-form-')) return;
+      
+      e.preventDefault();
+      const form = e.target;
+      const apiKey = form.id.replace('edit-form-', '').replace(/_/g, ' ');
+      const errorDiv = document.getElementById(`edit-error-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`);
+      
+      const payload = {
+        name: document.getElementById(`edit-name-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`).value,
+        model_id: document.getElementById(`edit-model-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`).value,
+        system_prompt: document.getElementById(`edit-system-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`).value,
+        temperature: parseFloat(document.getElementById(`edit-temp-${apiKey.replace(/[^a-zA-Z0-9]/g, '_')}`).value)
+      };
+      
+      try {
+        const res = await authService.fetchWithAuth(`http://localhost:8000/v1/admin/keys/${encodeURIComponent(apiKey)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (res.ok) {
+          showToast('Settings updated successfully!');
+          loadKeys(); // Reload all keys
+        } else {
+          errorDiv.textContent = 'Failed to update settings. Please try again.';
+          errorDiv.classList.remove('hidden');
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Network error. Please check your connection.';
+        errorDiv.classList.remove('hidden');
+      }
     });
+
+    // Toast notification
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-4 right-4 px-6 py-3 bg-green-500 text-white rounded-lg shadow-lg z-50 flex items-center gap-2';
+      toast.innerHTML = `<Check class="w-5 h-5" /> ${message}`;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Make functions globally accessible
+    window.toggleEditMode = toggleEditMode;
+    window.showToast = showToast;
+
+    // Initial Load
+    if (authService.isAuthenticated()) {
+      loadKeys();
+    }
   </script>
 </Layout>

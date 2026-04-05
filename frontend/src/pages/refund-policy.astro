@@ -1,0 +1,344 @@
+---
+import Layout from '../layouts/Layout.astro'
+---
+
+<Layout title="Refund & Cancellation Policy - Varaha">
+  <nav class="border-b border-white/10 glass backdrop-blur-md">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <div class="flex items-center space-x-8">
+          <a href="/" class="flex items-center space-x-2 relative">
+            <img src="/mandala2.svg" alt="Varaha Logo" class="w-10 h-10 object-contain scale-110 opacity-40 animate-spin animate-duration-1000" style="filter: brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(15deg) brightness(1.2);" />
+            <span class="text-2xl font-semibold text-white tracking-widest transform -translate-x-5">varaha<span class="text-brand-purple">.ai</span></span>
+          </a>
+          <div class="hidden md:flex space-x-6">
+            <a href="/docs" class="text-gray-300 hover:text-white transition-colors">Docs</a>
+            <a href="/pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
+            <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-16 px-4">
+    <div class="container mx-auto max-w-4xl">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-white mb-4">Refund & Cancellation Policy</h1>
+        <p class="text-lg text-gray-300">Last updated: April 5, 2026</p>
+      </div>
+
+      <div class="glass-enhanced rounded-xl border border-white/10 p-8 space-y-8">
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">1. Cancellation Policy</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>1.1 User-Initiated Cancellation:</strong> You may cancel your Varaha subscription 
+              at any time through your dashboard or by contacting our support team. 
+              No cancellation fees or penalties apply.
+            </p>
+            
+            <p>
+              <strong>1.2 Cancellation Method:</strong> To cancel your subscription:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Log into your Varaha dashboard</li>
+              <li>Navigate to Account Settings → Billing</li>
+              <li>Click "Cancel Subscription"</li>
+              <li>Follow confirmation prompts</li>
+              <li>Alternatively, email support@varaha.ai with cancellation request</li>
+            </ul>
+            
+            <p>
+              <strong>1.3 Immediate Effect:</strong> Cancellation takes effect immediately. 
+              Your access to paid features will terminate at the end of your current billing period.
+            </p>
+            
+            <p>
+              <strong>1.4 Data Retention:</strong> Upon cancellation, your account data will be:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Retained for 30 days (for data export purposes)</li>
+              <li>Permanently deleted after 30 days</li>
+              <li>API keys deactivated immediately</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">2. Refund Policy</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>2.1 Refund Eligibility:</strong> You may be eligible for a refund 
+              under the following circumstances:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li><strong>Service Outages:</strong> Extended downtime exceeding 24 hours</li>
+              <li><strong>Technical Issues:</strong> Persistent service-affecting bugs</li>
+              <li><strong>Overcharging:</strong> Incorrect billing amounts or duplicate charges</li>
+              <li><strong>Service Description:</strong> Significant deviation from advertised features</li>
+            </ul>
+            
+            <p>
+              <strong>2.2 Refund Timeframes:</strong>
+            </p>
+            <div class="glass-enhanced rounded-lg p-4 border border-white/10">
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <h3 class="text-lg font-semibold text-white mb-2">Within 7 Days</h3>
+                  <p class="text-sm text-gray-300">Full refund, no questions asked</p>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-white mb-2">8-30 Days</h3>
+                  <p class="text-sm text-gray-300">Pro-rated refund for unused portion</p>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-white mb-2">31-60 Days</h3>
+                  <p class="text-sm text-gray-300">Pro-rated refund minus 25% fee</p>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-white mb-2">After 60 Days</h3>
+                  <p class="text-sm text-gray-300">No refunds available</p>
+                </div>
+              </div>
+            </div>
+            
+            <p>
+              <strong>2.3 Non-Refundable Items:</strong> The following are not eligible for refunds:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>API usage charges (already consumed)</li>
+              <li>Third-party service fees</li>
+              <li>Custom development or integration services</li>
+              <li>Training or consulting services</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">3. Billing Cycle Management</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>3.1 Mid-Cycle Cancellation:</strong> If you cancel during your billing cycle:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Access continues until end of current billing period</li>
+              <li>No further charges will be incurred</li>
+              <li>Final invoice may include pro-rated charges for current usage</li>
+            </ul>
+            
+            <p>
+              <strong>3.2 Unused Credits:</strong> Any unused API credits or quotas 
+              will be forfeited upon cancellation and are non-refundable.
+            </p>
+            
+            <p>
+              <strong>3.3 Subscription Changes:</strong> Downgrading your subscription plan 
+              will take effect at the start of the next billing cycle.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">4. Refund Request Process</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>4.1 Request Submission:</strong> To request a refund:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Contact support via email or dashboard</li>
+              <li>Provide your account email and reason for refund</li>
+              <li>Include relevant details (dates, issues, screenshots)</li>
+              <li>Reference your order ID or invoice number</li>
+            </ul>
+            
+            <p>
+              <strong>4.2 Processing Time:</strong> Refund requests are processed within:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Standard requests: 5-7 business days</li>
+              <li>Complex cases: 10-14 business days</li>
+              <li>Payment processor delays may extend timeframe</li>
+            </ul>
+            
+            <p>
+              <strong>4.3 Refund Method:</strong> Refunds are issued using:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Original payment method (when possible)</li>
+              <li>Account credit for future use</li>
+              <li>Bank transfer (for international customers)</li>
+            </ul>
+            
+            <p>
+              <strong>4.4 Confirmation:</strong> You will receive email confirmation when:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Refund request is received</li>
+              <li>Refund is approved and processed</li>
+              <li>Refund is complete (with transaction details)</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">5. Special Circumstances</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>5.1 Service Discontinuation:</strong> If Varaha discontinues a service 
+              you're subscribed to, you may be eligible for:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Pro-rated refund for remaining billing period</li>
+              <li>Credit for equivalent service value</li>
+              <li>Migration assistance to alternative services</li>
+            </ul>
+            
+            <p>
+              <strong>5.2 Force Majeure:</strong> We are not responsible for refund delays 
+              or processing issues caused by circumstances beyond our control, including:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Payment processor outages</li>
+              <li>Banking system failures</li>
+              <li>Natural disasters or emergencies</li>
+              <li>Government regulations or restrictions</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">6. Dispute Resolution</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>6.1 Refund Disputes:</strong> If you disagree with a refund decision:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Contact our support team within 14 days of decision</li>
+              <li>Provide additional information or documentation</li>
+              <li>Request escalation to management team</li>
+            </ul>
+            
+            <p>
+              <strong>6.2 Chargeback Rights:</strong> You retain the right to:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Contact your bank or credit card company</li>
+              <li>Initiate chargeback procedures</li>
+              <li>File disputes with payment networks</li>
+            </ul>
+            
+            <p>
+              <strong>6.3 Resolution Process:</strong> We will:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Review all disputes fairly and promptly</li>
+              <li>Provide evidence of service delivery</li>
+              <li>Comply with payment network rules</li>
+              <li>Work with financial institutions to resolve issues</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">7. Data and Account Access</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>7.1 Post-Cancellation Access:</strong> After cancellation:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Immediate loss of access to paid features</li>
+              <li>API keys become inactive immediately</li>
+              <li>Dashboard access limited to account closure</li>
+              <li>No new API requests will be processed</li>
+            </ul>
+            
+            <p>
+              <strong>7.2 Data Export:</strong> Before permanent deletion, you can:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Export all usage data and metrics</li>
+              <li>Download API logs and request history</li>
+              <li>Export account settings and configurations</li>
+              <li>Request data in machine-readable format</li>
+            </ul>
+            
+            <p>
+              <strong>7.3 Reactivation:</strong> You can reactivate your account at any time:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>With current pricing and plans</li>
+              <li>Subject to updated terms of service</li>
+              <li>Previous data may not be recoverable after 30-day deletion period</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">8. Contact Information</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>8.1 Support Channels:</strong> For cancellation and refund requests:
+            </p>
+            <div class="glass-enhanced rounded-lg p-4 border border-white/10">
+              <p><strong>Email:</strong> support@varaha.ai</p>
+              <p><strong>Response Time:</strong> Within 24 business hours</p>
+              <p><strong>Phone:</strong> Available for enterprise customers</p>
+              <p><strong>Live Chat:</strong> Available on website during business hours</p>
+            </div>
+            
+            <p>
+              <strong>8.2 Billing Department:</strong> For billing-specific inquiries:
+            </p>
+            <div class="glass-enhanced rounded-lg p-4 border border-white/10">
+              <p><strong>Email:</strong> billing@varaha.ai</p>
+              <p><strong>Hours:</strong> Monday-Friday, 9 AM - 6 PM EST</p>
+              <p><strong>Response Time:</strong> Within 48 business hours</p>
+            </div>
+            
+            <p>
+              <strong>8.3 Legal Department:</strong> For legal matters or disputes:
+            </p>
+            <div class="glass-enhanced rounded-lg p-4 border border-white/10">
+              <p><strong>Email:</strong> legal@varaha.ai</p>
+              <p><strong>Response Time:</strong> Within 7 business days</p>
+              <p><strong>Mailing Address:</strong> Available upon request for formal notices</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-semibold text-white mb-4">9. Policy Changes</h2>
+          <div class="space-y-4 text-gray-300">
+            <p>
+              <strong>9.1 Notification:</strong> Changes to this refund and cancellation policy 
+              will be communicated via:
+            </p>
+            <ul class="list-disc list-inside ml-6 space-y-2">
+              <li>Email notifications to registered users</li>
+              <li>Dashboard announcements</li>
+              <li>Website banners for significant changes</li>
+              <li>Updated policy publication on website</li>
+            </ul>
+            
+            <p>
+              <strong>9.2 Effective Date:</strong> Policy changes take effect 
+              30 days after notification, unless required by law.
+            </p>
+            
+            <p>
+              <strong>9.3 Continued Use:</strong> Continued use of Varaha services after 
+              policy changes constitutes acceptance of the updated terms.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <div class="mt-8 text-center">
+        <a href="/terms" class="text-brand-purple hover:text-brand-blue transition-colors mr-6">Terms of Service</a>
+        <a href="/privacy" class="text-brand-purple hover:text-brand-blue transition-colors mr-6">Privacy Policy</a>
+        <a href="/dpa" class="text-brand-purple hover:text-brand-blue transition-colors">Data Processing Agreement</a>
+      </div>
+    </div>
+  </main>
+</Layout>

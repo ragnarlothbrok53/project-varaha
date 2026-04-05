@@ -1,0 +1,191 @@
+---
+// Chat widget component for live customer support
+---
+
+<div id="livechat-widget" class="fixed bottom-4 right-4 z-50 glass-enhanced rounded-lg border border-white/20 p-4 shadow-2xl transition-all duration-300">
+  <button 
+    id="livechat-toggle"
+    class="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-full shadow-lg hover:scale-110 transition-all duration-200 mb-3"
+    onclick="toggleLiveChat()"
+  >
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+      <path d="M21 15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2"></path>
+      <path d="M21 4a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2"></path>
+      <path d="M12 2v20"></path>
+      <path d="M12 2l7 7 7 7"></path>
+    </svg>
+  </button>
+  
+  <div id="livechat-container" class="hidden">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-white font-semibold">Live Support</h3>
+      <button 
+        onclick="toggleLiveChat()"
+        class="text-gray-400 hover:text-white transition-colors"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M18 6L6 6M6 18L18 18"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <div id="chat-messages" class="h-80 overflow-y-auto mb-4 space-y-2 p-2 bg-black/30 rounded border border-white/10">
+      <div class="text-center text-gray-400 text-sm py-8">
+        <svg class="w-8 h-8 mx-auto mb-2 animate-spin" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M21 12a9 9 0 1 1-9 9"></path>
+          <path d="M9 21c0 .5.4 0 .9-.2l1.25 1.76c.84.4 1.84 1.2 1.84"></path>
+        </svg>
+        <p>Connecting to support...</p>
+      </div>
+    </div>
+    
+    <div class="flex gap-2">
+      <input 
+        type="text" 
+        id="chat-input"
+        placeholder="Type your message..."
+        class="flex-1 px-4 py-2 bg-black/30 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-brand-purple"
+        onkeypress="handleChatKeypress(event)"
+      />
+      <button 
+        onclick="sendMessage()"
+        class="px-4 py-2 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 transition-all duration-200"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M22 2L11 13M22 2l-7 7-7 7"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  #livechat-widget.minimized {
+    transform: scale(0.8);
+  }
+  
+  #livechat-widget.expanded {
+    width: 350px;
+    height: 500px;
+  }
+  
+  #chat-messages {
+    min-height: 300px;
+  }
+</style>
+
+<script>
+  let isMinimized = true;
+  let isConnected = false;
+  
+  function toggleLiveChat() {
+    const widget = document.getElementById('livechat-widget');
+    const container = document.getElementById('livechat-container');
+    
+    isMinimized = !isMinimized;
+    
+    if (isMinimized) {
+      widget.classList.remove('minimized');
+      widget.classList.add('expanded');
+      container.classList.remove('hidden');
+      
+      // Simulate connection
+      setTimeout(() => {
+        connectToSupport();
+      }, 1000);
+    } else {
+      widget.classList.remove('expanded');
+      widget.classList.add('minimized');
+      container.classList.add('hidden');
+    }
+  }
+  
+  function connectToSupport() {
+    const messagesContainer = document.getElementById('chat-messages');
+    
+    // Simulate support agent joining
+    setTimeout(() => {
+      messagesContainer.innerHTML = `
+        <div class="flex items-start gap-2 mb-2">
+          <div class="w-8 h-8 bg-brand-purple rounded-full flex items-center justify-center text-white text-xs font-semibold">
+            S
+          </div>
+          <div class="glass-enhanced rounded-lg p-3 max-w-[70%]">
+            <p class="text-sm text-white">Hello! I'm Sarah from Varaha support. How can I help you today?</p>
+            <p class="text-xs text-gray-400 mt-1">Connected at ${new Date().toLocaleTimeString()}</p>
+          </div>
+        </div>
+      `;
+      isConnected = true;
+    }, 2000);
+  }
+  
+  function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    
+    if (!message || !isConnected) return;
+    
+    const messagesContainer = document.getElementById('chat-messages');
+    
+    // Add user message
+    const userMessage = document.createElement('div');
+    userMessage.className = 'flex items-end gap-2 mb-2';
+    userMessage.innerHTML = `
+      <div class="glass-enhanced rounded-lg p-3 max-w-[70%]">
+        <p class="text-sm text-white">${message}</p>
+        <p class="text-xs text-gray-400 mt-1">${new Date().toLocaleTimeString()}</p>
+      </div>
+    `;
+    messagesContainer.appendChild(userMessage);
+    
+    input.value = '';
+    
+    // Simulate support response
+    setTimeout(() => {
+      const supportMessage = document.createElement('div');
+      supportMessage.className = 'flex items-start gap-2 mb-2';
+      supportMessage.innerHTML = `
+        <div class="w-8 h-8 bg-brand-purple rounded-full flex items-center justify-center text-white text-xs font-semibold">
+          S
+        </div>
+        <div class="glass-enhanced rounded-lg p-3 max-w-[70%]">
+          <p class="text-sm text-white">Thank you for your message. I'll help you with that right away. Let me check your account details...</p>
+          <p class="text-xs text-gray-400 mt-1">Typing...</p>
+        </div>
+      `;
+      messagesContainer.appendChild(supportMessage);
+      
+      // Simulate typing indicator resolution
+      setTimeout(() => {
+        const lastMessage = messagesContainer.lastElementChild;
+        const typingIndicator = lastMessage.querySelector('.text-xs.text-gray-400');
+        if (typingIndicator) {
+          typingIndicator.textContent = 'I can see you have questions about our refund policy. You can cancel anytime through your dashboard, and we offer pro-rated refunds for unused portions of your billing cycle.';
+        }
+      }, 2000);
+    }, 1500);
+  }
+  
+  function handleChatKeypress(event) {
+    if (event.key === 'Enter') {
+      sendMessage();
+    }
+  }
+  
+  // Auto-expand on first interaction
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      if (localStorage.getItem('livechat-minimized') === 'false') {
+        toggleLiveChat();
+      }
+    }, 3000);
+  });
+  
+  // Save chat state
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#livechat-widget')) {
+      localStorage.setItem('livechat-minimized', isMinimized);
+    }
+  });
+</script>
