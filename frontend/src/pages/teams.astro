@@ -1,0 +1,164 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { authService } from '../lib/auth.ts'
+const user = authService.getUser()
+---
+
+<Layout title="Teams - Varaha">
+  <nav class="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <div class="flex items-center space-x-8">
+          <a href="/" class="flex items-center space-x-2">
+            <span class="text-2xl font-bold text-primary-600">Varaha</span>
+          </a>
+          <div class="hidden md:flex space-x-6">
+            <a href="/docs" class="text-gray-600 hover:text-gray-900">Docs</a>
+            <a href="/pricing" class="text-gray-600 hover:text-gray-900">Pricing</a>
+            <a href="/dashboard" class="text-gray-600 hover:text-gray-900">Dashboard</a>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-gray-600">{user?.name || 'Guest'}</span>
+            {user ? (
+              <a href="/settings" class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                Settings
+              </a>
+            ) : (
+              <>
+                <a href="/login" class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                  Login
+                </a>
+                <a href="/register" class="px-3 py-1 text-sm bg-primary-600 text-white rounded hover:bg-primary-700">
+                  Sign Up
+                </a>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-8">
+    <div class="container mx-auto px-4 max-w-6xl">
+      <div class="flex justify-between items-center mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Teams</h1>
+          <p class="text-gray-600">Manage your teams and collaborate on projects</p>
+        </div>
+        <a href="/teams/new" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+          Create Team
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg border p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold">Engineering Team</h3>
+            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Active</span>
+          </div>
+          <p class="text-gray-600 mb-4">Core development team working on API infrastructure</p>
+          <div class="flex items-center justify-between">
+            <div class="flex -space-x-2">
+              <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs">JD</div>
+              <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white text-xs">AS</div>
+              <div class="w-8 h-8 bg-primary-400 rounded-full flex items-center justify-center text-white text-xs">MK</div>
+              <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-xs">+2</div>
+            </div>
+            <span class="text-sm text-gray-500">5 members</span>
+          </div>
+          <div class="mt-4 pt-4 border-t">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Projects</span>
+              <span class="font-medium">8</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold">Data Science</h3>
+            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Active</span>
+          </div>
+          <p class="text-gray-600 mb-4">Machine learning and analytics team</p>
+          <div class="flex items-center justify-between">
+            <div class="flex -space-x-2">
+              <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs">RF</div>
+              <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">LT</div>
+              <div class="w-8 h-8 bg-purple-400 rounded-full flex items-center justify-center text-white text-xs">CH</div>
+            </div>
+            <span class="text-sm text-gray-500">3 members</span>
+          </div>
+          <div class="mt-4 pt-4 border-t">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Projects</span>
+              <span class="font-medium">4</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold">Product Team</h3>
+            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Pending</span>
+          </div>
+          <p class="text-gray-600 mb-4">Product management and design team</p>
+          <div class="flex items-center justify-between">
+            <div class="flex -space-x-2">
+              <div class="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white text-xs">NP</div>
+              <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs">SK</div>
+            </div>
+            <span class="text-sm text-gray-500">2 members</span>
+          </div>
+          <div class="mt-4 pt-4 border-t">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Projects</span>
+              <span class="font-medium">2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-12">
+        <h2 class="text-xl font-semibold mb-4">Team Activity</h2>
+        <div class="bg-white rounded-lg border">
+          <div class="p-4 border-b">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs">JD</div>
+                <div>
+                  <p class="text-sm font-medium">John Doe created new project "API Optimization"</p>
+                  <p class="text-xs text-gray-500">Engineering Team • 2 hours ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 border-b">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs">RF</div>
+                <div>
+                  <p class="text-sm font-medium">Rachel Fisher completed model training</p>
+                  <p class="text-xs text-gray-500">Data Science • 4 hours ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white text-xs">NP</div>
+                <div>
+                  <p class="text-sm font-medium">Nick Parker invited Sarah Kim to Product Team</p>
+                  <p class="text-xs text-gray-500">Product Team • 1 day ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

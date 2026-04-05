@@ -1,0 +1,39 @@
+---
+import '../styles/globals.css'
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-[#020617] text-white min-h-screen">
+    <div class="glow-mesh"></div>
+    <div class="mandala-bg">
+      <img src="/mandala1.svg" alt="Mandala Pattern" class="w-full h-full object-contain opacity-20" />
+    </div>
+    <div class="mandala-corner mandala-corner-1">
+      <img src="/mandala2.svg" alt="Mandala Corner" class="w-full h-full object-contain opacity-30" />
+    </div>
+    <div class="mandala-corner mandala-corner-2">
+      <img src="/mandala3.svg" alt="Mandala Corner" class="w-full h-full object-contain opacity-30" />
+    </div>
+    <div class="mandala-corner mandala-corner-3">
+      <img src="/mandala1.svg" alt="Mandala Corner" class="w-full h-full object-contain opacity-30" />
+    </div>
+    <div class="mandala-corner mandala-corner-4">
+      <img src="/mandala2.svg" alt="Mandala Corner" class="w-full h-full object-contain opacity-30" />
+    </div>
+    <div class="mandala-pattern" style="top: 20%; left: 10%;">
+      <img src="/mandala3.svg" alt="Mandala Decoration" class="w-full h-full object-contain opacity-40" />
+    </div>
+    <div class="mandala-pattern" style="top: 60%; right: 15%;">
+      <img src="/mandala1.svg" alt="Mandala Decoration" class="w-full h-full object-contain opacity-40" />
+    </div>
+    <slot />
+  </body>
+</html>

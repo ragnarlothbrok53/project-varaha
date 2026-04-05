@@ -1,0 +1,238 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { authService } from '../lib/auth.ts'
+const user = authService.getUser()
+---
+
+<Layout title="Projects - Varaha">
+  <nav class="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <div class="flex items-center space-x-8">
+          <a href="/" class="flex items-center space-x-2">
+            <span class="text-2xl font-bold text-primary-600">Varaha</span>
+          </a>
+          <div class="hidden md:flex space-x-6">
+            <a href="/docs" class="text-gray-600 hover:text-gray-900">Docs</a>
+            <a href="/pricing" class="text-gray-600 hover:text-gray-900">Pricing</a>
+            <a href="/dashboard" class="text-gray-600 hover:text-gray-900">Dashboard</a>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-gray-600">{user?.name || 'Guest'}</span>
+            {user ? (
+              <a href="/settings" class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                Settings
+              </a>
+            ) : (
+              <>
+                <a href="/login" class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                  Login
+                </a>
+                <a href="/register" class="px-3 py-1 text-sm bg-primary-600 text-white rounded hover:bg-primary-700">
+                  Sign Up
+                </a>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-8">
+    <div class="container mx-auto px-4 max-w-6xl">
+      <div class="flex justify-between items-center mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Projects</h1>
+          <p class="text-gray-600">Manage your projects and track progress</p>
+        </div>
+        <a href="/projects/new" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+          New Project
+        </a>
+      </div>
+
+      <div class="mb-6 flex flex-wrap gap-2">
+        <button class="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm">All Projects</button>
+        <button class="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-full text-sm">Active</button>
+        <button class="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-full text-sm">Completed</button>
+        <button class="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-full text-sm">Archived</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg border p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold">API Optimization</h3>
+            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Active</span>
+          </div>
+          <p class="text-gray-600 mb-4">Optimize LLM inference performance and reduce latency</p>
+          <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+            <span>Engineering Team</span>
+            <span>•</span>
+            <span>Due Dec 15</span>
+          </div>
+          <div class="mb-4">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Progress</span>
+              <span class="font-medium">75%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-primary-600 h-2 rounded-full" style="width: 75%"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex -space-x-2">
+              <div class="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs">JD</div>
+              <div class="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center text-white text-xs">AS</div>
+            </div>
+            <span class="text-sm text-gray-500">2 tasks left</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold">Model Training Pipeline</h3>
+            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Active</span>
+          </div>
+          <p class="text-gray-600 mb-4">Build automated model training and evaluation pipeline</p>
+          <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+            <span>Data Science</span>
+            <span>•</span>
+            <span>Due Dec 20</span>
+          </div>
+          <div class="mb-4">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Progress</span>
+              <span class="font-medium">40%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-primary-600 h-2 rounded-full" style="width: 40%"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex -space-x-2">
+              <div class="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs">RF</div>
+              <div class="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">LT</div>
+            </div>
+            <span class="text-sm text-gray-500">6 tasks left</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold">Documentation Site</h3>
+            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Review</span>
+          </div>
+          <p class="text-gray-600 mb-4">Create comprehensive documentation for API users</p>
+          <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+            <span>Product Team</span>
+            <span>•</span>
+            <span>Due Dec 10</span>
+          </div>
+          <div class="mb-4">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Progress</span>
+              <span class="font-medium">90%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-yellow-500 h-2 rounded-full" style="width: 90%"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex -space-x-2">
+              <div class="w-6 h-6 bg-orange-600 rounded-full flex items-center justify-center text-white text-xs">NP</div>
+            </div>
+            <span class="text-sm text-gray-500">1 task left</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold">Security Audit</h3>
+            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Planning</span>
+          </div>
+          <p class="text-gray-600 mb-4">Comprehensive security review and vulnerability assessment</p>
+          <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+            <span>Engineering Team</span>
+            <span>•</span>
+            <span>Due Jan 15</span>
+          </div>
+          <div class="mb-4">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Progress</span>
+              <span class="font-medium">10%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-gray-400 h-2 rounded-full" style="width: 10%"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex -space-x-2">
+              <div class="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs">MK</div>
+            </div>
+            <span class="text-sm text-gray-500">9 tasks left</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold">Mobile SDK</h3>
+            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Development</span>
+          </div>
+          <p class="text-gray-600 mb-4">Build native mobile SDKs for iOS and Android</p>
+          <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+            <span>Engineering Team</span>
+            <span>•</span>
+            <span>Due Feb 1</span>
+          </div>
+          <div class="mb-4">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Progress</span>
+              <span class="font-medium">25%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-blue-500 h-2 rounded-full" style="width: 25%"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex -space-x-2">
+              <div class="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs">AS</div>
+              <div class="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center text-white text-xs">JD</div>
+            </div>
+            <span class="text-sm text-gray-500">12 tasks left</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold">Performance Dashboard</h3>
+            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Completed</span>
+          </div>
+          <p class="text-gray-600 mb-4">Real-time performance monitoring dashboard</p>
+          <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+            <span>Data Science</span>
+            <span>•</span>
+            <span>Completed Dec 1</span>
+          </div>
+          <div class="mb-4">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Progress</span>
+              <span class="font-medium">100%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex -space-x-2">
+              <div class="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs">CH</div>
+              <div class="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">RF</div>
+            </div>
+            <span class="text-sm text-green-600">Completed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

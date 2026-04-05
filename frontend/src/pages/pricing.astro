@@ -1,0 +1,169 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { authService } from '../lib/auth.ts'
+const user = authService.getUser()
+---
+
+<Layout title="Pricing - Varaha">
+  <nav class="border-b border-white/10 glass backdrop-blur-md">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <div class="flex items-center space-x-8">
+          <a href="/" class="flex items-center space-x-2 relative">
+            <img src="/mandala2.svg" alt="Varaha Logo" class="w-10 h-10 object-contain scale-110 opacity-40 animate-spin animate-duration-1000" style="filter: brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(15deg) brightness(1.2);" />
+            <span class="text-2xl font-semibold text-white tracking-widest transform -translate-x-5">varaha<span class="text-brand-purple">.ai</span></span>
+          </a>
+          <div class="hidden md:flex space-x-6">
+            <a href="/docs" class="text-gray-300 hover:text-white transition-colors">Docs</a>
+            <a href="/pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
+            <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-gray-300">{user?.name || 'Guest'}</span>
+            {user ? (
+              <a href="/settings" class="px-3 py-1 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-colors text-white">
+                Settings
+              </a>
+            ) : (
+              <>
+                <a href="/login" class="px-3 py-1 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-colors text-white">
+                  Login
+                </a>
+                <a href="/register" class="px-3 py-1 text-sm bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 transition-all">
+                  Sign Up
+                </a>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-20">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h1 class="text-4xl font-bold text-white mb-4">Unlimited SLM Inference for Indie Devs</h1>
+        <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+          Run specialized task APIs without limits. Perfect for day-to-day workloads, 
+          from content creation to data extraction - all optimized for Apple Silicon.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div class="glass rounded-lg backdrop-blur-md border border-white/10 p-8">
+          <h3 class="text-2xl font-bold mb-2 text-white">Starter</h3>
+          <p class="text-gray-300 mb-6">Perfect for indie developers getting started</p>
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-white">$0</span>
+            <span class="text-gray-300">/month</span>
+          </div>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-center">
+              <span class="text-green-400 mr-2">✓</span>
+              <span class="text-gray-300">Unlimited local inference</span>
+            </li>
+            <li class="flex items-center">
+              <span class="text-green-400 mr-2">✓</span>
+              <span class="text-gray-300">All specialized task APIs</span>
+            </li>
+            <li class="flex items-center">
+              <span class="text-green-400 mr-2">✓</span>
+              <span class="text-gray-300">Apple Silicon optimization</span>
+            </li>
+            <li class="flex items-center">
+              <span class="text-green-400 mr-2">✓</span>
+              <span class="text-gray-300">Community support</span>
+            </li>
+          </ul>
+          <button class="w-full px-6 py-3 border border-white/20 rounded-lg hover:bg-white/10 transition-colors text-white">
+            Get Started
+          </button>
+        </div>
+
+        <div class="glass-purple rounded-lg backdrop-blur-md border border-brand-purple/30 p-8 transform scale-105">
+          <div class="bg-brand-purple text-white text-sm font-medium px-3 py-1 rounded-full inline-block mb-4">
+            Most Popular
+          </div>
+          <h3 class="text-2xl font-bold mb-2 text-white">Pro</h3>
+          <p class="text-gray-300 mb-6">For serious indie developers and small teams</p>
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-white">$29</span>
+            <span class="text-gray-300">/month</span>
+          </div>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-center">
+              <span class="text-brand-purple mr-2">✓</span>
+              <span class="text-gray-300">Everything in Starter</span>
+            </li>
+            <li class="flex items-center">
+              <span class="text-brand-purple mr-2">✓</span>
+              <span class="text-gray-300">Batch processing queues</span>
+            </li>
+            <li class="flex items-center">
+              <span class="text-brand-purple mr-2">✓</span>
+              <span class="text-gray-300">Advanced analytics dashboard</span>
+            </li>
+            <li class="flex items-center">
+              <span class="text-brand-purple mr-2">✓</span>
+              <span class="text-gray-300">Priority support</span>
+            </li>
+          </ul>
+          <button class="w-full px-6 py-3 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 transition-all">
+            Start Pro Trial
+          </button>
+        </div>
+
+        <div class="glass rounded-lg backdrop-blur-md border border-white/10 p-8">
+          <h3 class="text-2xl font-bold mb-2 text-white">Unlimited</h3>
+          <p class="text-gray-300 mb-6">For power users and scaling startups</p>
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-white">$99</span>
+            <span class="text-gray-300">/month</span>
+          </div>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-center">
+              <span class="text-brand-blue mr-2">✓</span>
+              <span class="text-gray-300">Everything in Pro</span>
+            </li>
+            <li class="flex items-center">
+              <span class="text-brand-blue mr-2">✓</span>
+              <span class="text-gray-300">Unlimited concurrent requests</span>
+            </li>
+            <li class="flex items-center">
+              <span class="text-brand-blue mr-2">✓</span>
+              <span class="text-gray-300">Custom task development</span>
+            </li>
+            <li class="flex items-center">
+              <span class="text-brand-blue mr-2">✓</span>
+              <span class="text-gray-300">Dedicated support</span>
+            </li>
+          </ul>
+          <button class="w-full px-6 py-3 border border-white/20 rounded-lg hover:bg-white/10 transition-colors text-white">
+            Contact Sales
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-20 text-center">
+        <h2 class="text-2xl font-bold text-white mb-8">Frequently Asked Questions</h2>
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div class="glass p-6 rounded-lg backdrop-blur-md border border-white/10">
+            <h3 class="text-lg font-semibold text-white mb-2">What makes Varaha different from other LLM APIs?</h3>
+            <p class="text-gray-300">Varaha is optimized for Apple Silicon with Metal acceleration, offers specialized task APIs for common workloads, and includes unlimited local inference capabilities.</p>
+          </div>
+          <div class="glass p-6 rounded-lg backdrop-blur-md border border-white/10">
+            <h3 class="text-lg font-semibold text-white mb-2">Can I run Varaha on my own hardware?</h3>
+            <p class="text-gray-300">Yes! Varaha is designed to run locally on Apple Silicon devices, giving you complete control over your data and processing.</p>
+          </div>
+          <div class="glass p-6 rounded-lg backdrop-blur-md border border-white/10">
+            <h3 class="text-lg font-semibold text-white mb-2">What specialized tasks are included?</h3>
+            <p class="text-gray-300">We offer pre-built APIs for content creation, data extraction, summarization, code generation, and more - all optimized for specific use cases.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

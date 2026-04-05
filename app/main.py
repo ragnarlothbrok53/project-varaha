@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
 from .api.routes import router
+from .api.auth import router as auth_router
 from .core.worker import worker_loop
 from .core.engine import init_all_pools
 from .data.manager import init_db
@@ -19,6 +20,16 @@ async def lifespan(app: FastAPI):
     # Startup: Initialize the database, engine pool, and background worker
     logger.info("Initializing metrics database...")
     init_db()
+    
+    from .data.manager import get_user_by_email, create_user, create_api_key, validate_api_key
+    import bcrypt
+    if not get_user_by_email("admin@varaha.ai"):
+        pwd_hash = bcrypt.hashpw(b"admin", bcrypt.gensalt()).decode('utf-8')
+        create_user("admin-123", "admin@varaha.ai", pwd_hash, "Admin User")
+        logger.info("Created default admin user: admin@varaha.ai / admin")
+    
+    if not validate_api_key("admin-key"):
+        create_api_key("admin-key", "admin-123", "Default Key", "qwen", 0.1, "", "")
 
     logger.info("Initializing high-performance Engine Pools...")
     await init_all_pools()
@@ -36,6 +47,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Allow development frontends
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Static Files & Frontend
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -47,6 +67,7 @@ async def serve_home():
 
 
 app.include_router(router)
+app.include_router(auth_router, prefix="/v1")
 
 if __name__ == "__main__":
     import uvicorn

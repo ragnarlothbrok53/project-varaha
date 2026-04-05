@@ -46,6 +46,27 @@ uv run python -m tests.evaluator "http://localhost:$PORT"
 echo "⚡ Running Concurrency Benchmark (Latency & Throughput)..."
 uv run python -m tests.bencher "http://localhost:$PORT" 5 20
 
+echo "🔄 Populating logs with dummy requests..."
+# Create some dummy requests to populate logs
+for i in {1..10}; do
+  curl -s -X POST "http://localhost:$PORT/v1/execute" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer admin-key" \
+    -d "{\"task\": \"chat\", \"input\": {\"text\": \"Test request $i: Tell me a fun fact about numbers\"}}" \
+    > /dev/null
+done
+
+# Create some chat completion requests
+for i in {1..5}; do
+  curl -s -X POST "http://localhost:$PORT/v1/chat/completions" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer admin-key" \
+    -d "{\"model\": \"qwen\", \"messages\": [{\"role\": \"user\", \"content\": \"Chat test $i: What's the weather like today?\"}]}" \
+    > /dev/null
+done
+
+echo "✅ Dummy requests completed. Logs populated with sample data."
+
 echo -e "\n\n🎉 Startup verification complete. Server logs will appear below. Use Ctrl+C to stop."
 
 # Bring background process to foreground

@@ -1,0 +1,465 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { authService } from '../lib/auth.ts'
+import { Key, BarChart3, Zap, Play, RotateCcw, Upload, Download } from 'lucide-astro'
+const isAuthenticated = authService.isAuthenticated()
+---
+
+<Layout title="API Test - Varaha">
+  <nav class="border-b border-white/10 glass backdrop-blur-md">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <div class="flex items-center space-x-8">
+          <a href="/" class="flex items-center space-x-2 relative">
+            <img src="/mandala2.svg" alt="Varaha Logo" class="w-10 h-10 object-contain scale-110 opacity-40 animate-spin animate-duration-1000" style="filter: brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(15deg) brightness(1.2);" />
+            <span class="text-2xl font-semibold text-white tracking-widest transform -translate-x-5">varaha<span class="text-brand-purple">.ai</span></span>
+          </a>
+          <div class="hidden md:flex space-x-6">
+            <a href="/docs" class="text-gray-300 hover:text-white transition-colors">Docs</a>
+            <a href="/pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
+            <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+            <a href="/api-test" class="text-white font-medium">API Test</a>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button 
+            id="logoutBtn"
+            class="px-4 py-2 text-sm border border-white/20 rounded-lg hover:bg-white/10 transition-colors text-white"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-12">
+    <div class="container mx-auto px-4 max-w-6xl">
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-8 border-b border-white/10">
+        <div>
+          <h1 class="text-3xl font-bold text-white mb-2">API Testing Console</h1>
+          <p class="text-gray-400">Test your API keys with real-time performance metrics.</p>
+        </div>
+      </div>
+
+      <!-- Test Configuration -->
+      <div class="grid md:grid-cols-2 gap-8 mb-8">
+        <!-- Key Selection -->
+        <div class="glass p-6 rounded-xl border border-white/10">
+          <h2 class="text-xl font-semibold mb-4 text-white flex items-center">
+            <span class="w-8 h-8 rounded bg-brand-purple/20 text-brand-purple flex items-center justify-center mr-3"><Key class="w-4 h-4" /></span>
+            Select API Key
+          </h2>
+          <select id="keySelect" class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple">
+            <option value="">Loading keys...</option>
+          </select>
+          <div class="mt-4">
+            <label class="block text-sm text-gray-300 mb-2">Or enter custom key:</label>
+            <input type="text" id="customKey" placeholder="vk_live_..." class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple">
+          </div>
+        </div>
+
+        <!-- Test Configuration -->
+        <div class="glass p-6 rounded-xl border border-white/10">
+          <h2 class="text-xl font-semibold mb-4 text-white flex items-center">
+            <span class="w-8 h-8 rounded bg-brand-blue/20 text-brand-blue flex items-center justify-center mr-3"><Zap class="w-4 h-4" /></span>
+            Test Configuration
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-gray-300 mb-2">Test Type</label>
+              <select id="testType" class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple">
+                <option value="chat">Chat Completion</option>
+                <option value="execute">Execute Task</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-300 mb-2">Test Prompt</label>
+              <textarea id="testPrompt" rows="3" placeholder="Enter your test prompt here..." class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple">Hello! Can you tell me a short joke?</textarea>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-300 mb-2">Concurrent Requests</label>
+              <input type="number" id="concurrentRequests" value="1" min="1" max="10" class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-brand-purple">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Controls -->
+      <div class="glass-enhanced p-6 rounded-xl border border-white/10 mb-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-white">Test Controls</h3>
+            <p class="text-sm text-gray-400 mt-1">Run performance tests and monitor metrics</p>
+          </div>
+          <div class="flex gap-4">
+            <button id="runTestBtn" class="px-6 py-3 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 shadow-lg font-medium transition-all flex items-center gap-2"><Play class="w-4 h-4" /> Run Test</button>
+            <button id="clearResultsBtn" class="px-6 py-3 glass border border-white/10 text-white rounded-lg hover:bg-white/10 font-medium transition-all">
+              Clear Results
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="glass p-6 rounded-xl border border-white/10">
+        <h3 class="text-xl font-semibold mb-6 text-white flex items-center">
+          <span class="w-8 h-8 rounded bg-green-500/20 text-green-400 flex items-center justify-center mr-3"><BarChart3 class="w-4 h-4" /></span>
+          Performance Metrics
+        </h3>
+        
+        <div id="testResults" class="space-y-6">
+          <div class="text-center py-8 text-gray-400">
+            No test results yet. Run a test to see performance metrics.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    import { authService } from '../lib/auth.ts';
+    
+    // Auth Guard
+    if (!authService.isAuthenticated()) {
+      window.location.href = '/login';
+    }
+
+    if (document.getElementById('logoutBtn')) {
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        authService.logout();
+        window.location.href = '/login';
+      });
+    }
+
+    let currentResults = [];
+
+    // Load API Keys
+    async function loadKeys() {
+      try {
+        const res = await authService.fetchWithAuth('http://localhost:8000/v1/admin/keys');
+        if (res.ok) {
+          const data = await res.json();
+          const select = document.getElementById('keySelect');
+          select.innerHTML = '<option value="">Select a key...</option>';
+          data.keys.forEach(key => {
+            const option = document.createElement('option');
+            option.value = key.key;
+            option.textContent = `${key.name} (${key.model_id})`;
+            select.appendChild(option);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load keys:', err);
+      }
+    }
+
+    // Run API Test
+    async function runTest() {
+      const keySelect = document.getElementById('keySelect');
+      const customKey = document.getElementById('customKey');
+      const testType = document.getElementById('testType').value;
+      const testPrompt = document.getElementById('testPrompt').value;
+      const concurrentCount = parseInt(document.getElementById('concurrentRequests').value);
+      
+      const apiKey = customKey.value || keySelect.value;
+      if (!apiKey) {
+        alert('Please select or enter an API key');
+        return;
+      }
+
+      const runBtn = document.getElementById('runTestBtn');
+      runBtn.disabled = true;
+      runBtn.textContent = '⏳ Running...';
+
+      const results = [];
+      const startTime = performance.now();
+
+      // Run concurrent requests
+      const promises = [];
+      for (let i = 0; i < concurrentCount; i++) {
+        promises.push(runSingleRequest(apiKey, testType, testPrompt, i));
+      }
+
+      try {
+        const requestResults = await Promise.all(promises);
+        const endTime = performance.now();
+        
+        // Calculate metrics
+        const totalLatency = endTime - startTime;
+        const avgLatency = totalLatency / concurrentCount;
+        
+        requestResults.forEach((result, index) => {
+          if (result.success) {
+            results.push({
+              requestId: index + 1,
+              latency: result.latency,
+              ttft: result.ttft,
+              tps: result.tps,
+              inputTokens: result.inputTokens,
+              outputTokens: result.outputTokens,
+              response: result.response,
+              error: null
+            });
+          } else {
+            results.push({
+              requestId: index + 1,
+              latency: 0,
+              ttft: 0,
+              tps: 0,
+              inputTokens: 0,
+              outputTokens: 0,
+              response: null,
+              error: result.error
+            });
+          }
+        });
+
+        currentResults = results;
+        displayResults(results, avgLatency);
+        
+      } catch (error) {
+        console.error('Test failed:', error);
+        alert('Test failed: ' + error.message);
+      } finally {
+        runBtn.disabled = false;
+        runBtn.textContent = 'RUN TEST';
+      }
+    }
+
+    // Run single API request
+    async function runSingleRequest(apiKey, testType, prompt, requestId) {
+      const startTime = performance.now();
+      let ttft = 0;
+      let firstChunkReceived = false;
+      
+      try {
+        let url, payload, headers;
+        
+        if (testType === 'chat') {
+          url = 'http://localhost:8000/v1/chat/completions';
+          payload = {
+            model: "qwen",
+            messages: [
+              { role: "user", content: prompt }
+            ],
+            stream: false
+          };
+        } else {
+          url = 'http://localhost:8000/v1/execute';
+          payload = {
+            task: "chat",
+            input: { text: prompt },
+            config: { stream: false }
+          };
+        }
+        
+        headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        };
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          return {
+            success: false,
+            error: `HTTP ${response.status}: ${response.statusText}`
+          };
+        }
+
+        const data = await response.json();
+        const endTime = performance.now();
+        const latency = endTime - startTime;
+        
+        // Extract metrics from response
+        let inputTokens = 0, outputTokens = 0, tps = 0;
+        
+        if (testType === 'chat' && data.usage) {
+          inputTokens = data.usage.prompt_tokens || 0;
+          outputTokens = data.usage.completion_tokens || 0;
+        } else if (data.metrics) {
+          inputTokens = data.metrics.input_tokens || 0;
+          outputTokens = data.metrics.output_tokens || 0;
+          ttft = data.metrics.ttft_ms || 0;
+          tps = data.metrics.tps || 0;
+        }
+        
+        if (outputTokens > 0 && latency > 0) {
+          tps = (outputTokens / (latency / 1000)).toFixed(2);
+        }
+
+        return {
+          success: true,
+          latency: latency.toFixed(2),
+          ttft: ttft.toFixed(2),
+          tps: parseFloat(tps),
+          inputTokens,
+          outputTokens,
+          response: testType === 'chat' ? data.choices?.[0]?.message?.content : data.data,
+          requestPayload: payload,
+          responseJson: data
+        };
+
+      } catch (error) {
+        return {
+          success: false,
+          error: error.message
+        };
+      }
+    }
+
+    // Display test results
+    function displayResults(results, avgLatency) {
+      const resultsDiv = document.getElementById('testResults');
+      
+      if (results.length === 0) {
+        resultsDiv.innerHTML = '<div class="text-center py-8 text-gray-400">No results to display.</div>';
+        return;
+      }
+
+      const successfulResults = results.filter(r => !r.error);
+      const failedResults = results.filter(r => r.error);
+
+      // Calculate aggregate metrics
+      const avgTTFT = successfulResults.length > 0 
+        ? (successfulResults.reduce((sum, r) => sum + parseFloat(r.ttft), 0) / successfulResults.length).toFixed(2)
+        : 0;
+      const avgTPS = successfulResults.length > 0
+        ? (successfulResults.reduce((sum, r) => sum + r.tps, 0) / successfulResults.length).toFixed(2)
+        : 0;
+      const totalTokens = successfulResults.reduce((sum, r) => sum + r.inputTokens + r.outputTokens, 0);
+
+      resultsDiv.innerHTML = `
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div class="glass p-4 rounded-lg border border-white/10">
+            <div class="text-sm text-gray-400 mb-1">Avg Latency</div>
+            <div class="text-2xl font-bold text-white">${avgLatency.toFixed(2)}ms</div>
+          </div>
+          <div class="glass p-4 rounded-lg border border-white/10">
+            <div class="text-sm text-gray-400 mb-1">Avg TTFT</div>
+            <div class="text-2xl font-bold text-brand-purple">${avgTTFT}ms</div>
+          </div>
+          <div class="glass p-4 rounded-lg border border-white/10">
+            <div class="text-sm text-gray-400 mb-1">Avg TPS</div>
+            <div class="text-2xl font-bold text-brand-blue">${avgTPS}</div>
+          </div>
+          <div class="glass p-4 rounded-lg border border-white/10">
+            <div class="text-sm text-gray-400 mb-1">Total Tokens</div>
+            <div class="text-2xl font-bold text-green-400">${totalTokens}</div>
+          </div>
+        </div>
+
+        <!-- Success Rate -->
+        <div class="glass-enhanced p-6 rounded-xl border border-white/10 mb-8">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-gray-400 mb-1">Success Rate</div>
+              <div class="text-lg font-semibold text-white">${successfulResults.length}/${results.length} requests</div>
+            </div>
+            <div class="text-2xl font-bold ${successfulResults.length === results.length ? 'text-green-400' : 'text-yellow-400'}">
+              ${((successfulResults.length / results.length) * 100).toFixed(1)}%
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Results -->
+        <div class="space-y-3">
+          <h4 class="text-lg font-semibold text-white mb-3">Individual Request Results</h4>
+          ${results.map((result, index) => `
+            <div class="glass p-4 rounded-lg border border-white/10">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <span class="text-sm font-medium text-white">Request #${result.requestId}</span>
+                  ${result.error 
+                    ? '<span class="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded">Failed</span>'
+                    : '<span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">Success</span>'
+                  }
+                </div>
+                ${!result.error ? `
+                  <div class="flex gap-4 text-sm">
+                    <span class="text-gray-400">Latency: <span class="text-white">${result.latency}ms</span></span>
+                    <span class="text-gray-400">TTFT: <span class="text-brand-purple">${result.ttft}ms</span></span>
+                    <span class="text-gray-400">TPS: <span class="text-brand-blue">${result.tps}</span></span>
+                  </div>
+                ` : ''}
+              </div>
+              ${result.error 
+                ? `<div class="text-red-400 text-sm">${result.error}</div>`
+                : `
+                  <div class="text-sm text-gray-400 mb-2">
+                    Tokens: ${result.inputTokens} in → ${result.outputTokens} out
+                  </div>
+                  
+                  <!-- Expandable JSON sections -->
+                  <div class="space-y-2">
+                    <div class="border border-white/10 rounded-lg overflow-hidden">
+                      <button class="w-full px-3 py-2 bg-black/30 text-left text-sm text-gray-300 hover:bg-black/40 transition-colors flex justify-between items-center" onclick="toggleApiTestSection('api-input-${index}')">
+                        <Upload class="w-4 h-4" /> Request JSON
+                        <span id="api-input-chevron-${index}" class="text-xs">▼</span>
+                      </button>
+                      <div id="api-input-${index}" class="hidden">
+                        <div class="p-3 bg-black/20 border-t border-white/10 max-h-96 overflow-y-auto">
+                          <pre class="text-xs text-gray-300 bg-black/40 p-2 rounded overflow-x-auto whitespace-pre-wrap break-all">${JSON.stringify(result.requestPayload, null, 2)}</pre>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="border border-white/10 rounded-lg overflow-hidden">
+                      <button class="w-full px-3 py-2 bg-black/30 text-left text-sm text-gray-300 hover:bg-black/40 transition-colors flex justify-between items-center" onclick="toggleApiTestSection('api-output-${index}')">
+                        <Download class="w-4 h-4" /> Response JSON
+                        <span id="api-output-chevron-${index}" class="text-xs">▼</span>
+                      </button>
+                      <div id="api-output-${index}" class="hidden">
+                        <div class="p-3 bg-black/20 border-t border-white/10 max-h-96 overflow-y-auto">
+                          <pre class="text-xs text-gray-300 bg-black/40 p-2 rounded overflow-x-auto whitespace-pre-wrap break-all">${JSON.stringify(result.responseJson, null, 2)}</pre>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `
+              }
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Clear results
+    function clearResults() {
+      currentResults = [];
+      document.getElementById('testResults').innerHTML = '<div class="text-center py-8 text-gray-400">No test results yet. Run a test to see performance metrics.</div>';
+    }
+
+    // Toggle API Test section visibility
+    function toggleApiTestSection(sectionId) {
+      const section = document.getElementById(sectionId);
+      const chevronId = sectionId.replace('api-input-', 'api-input-chevron-').replace('api-output-', 'api-output-chevron-');
+      const chevron = document.getElementById(chevronId);
+      
+      if (section.classList.contains('hidden')) {
+        section.classList.remove('hidden');
+        chevron.textContent = '▲';
+      } else {
+        section.classList.add('hidden');
+        chevron.textContent = '▼';
+      }
+    }
+
+    // Make functions globally accessible
+    window.toggleApiTestSection = toggleApiTestSection;
+
+    // Event listeners
+    document.getElementById('runTestBtn').addEventListener('click', runTest);
+    document.getElementById('clearResultsBtn').addEventListener('click', clearResults);
+
+    // Initialize
+    loadKeys();
+  </script>
+</Layout>

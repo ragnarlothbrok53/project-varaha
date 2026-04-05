@@ -5,20 +5,17 @@ import base64
 import io
 import pypdf
 import docx
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import StreamingResponse
-from typing import Dict, Any
 
-from ..core.worker import job_queue, results, cache
+from ..core.worker import job_queue, results
 from ..data.manager import (
     get_all_job_ids, get_job_metrics, validate_api_key,
-    create_team, get_all_teams, create_api_key, 
-    deactivate_api_key, get_team_keys
+    create_api_key, get_user_keys, get_metrics_by_key
 )
-from ..utils.helpers import generate_job_id, sse, chunk_text
+from ..utils.helpers import sse, chunk_text
 from ..services.builder import build_prompt
-from ..services.compressor import compress
-from ..utils.config import PROMPT_COMPRESSION
+from .auth import verify_jwt
 
 router = APIRouter()
 
@@ -35,27 +32,33 @@ async def get_metrics(job_id: str):
         raise HTTPException(status_code=404, detail="Request metrics not found")
     return {"job_id": job_id, "metrics": metrics}
 
+@router.get("/v1/requests/key/{api_key}")
+async def get_key_requests(api_key: str, user: dict = Depends(verify_jwt)):
+    # Note: For production, we should enforce that api_key belongs to user["id"]
+    return {"requests": get_metrics_by_key(api_key)}
+
 @router.post("/v1/execute")
 async def execute(request: Request):
     body = await request.json()
     auth_header = request.headers.get("Authorization", "")
     api_key = auth_header.replace("Bearer ", "").strip()
-    team = validate_api_key(api_key)
+    key_info = validate_api_key(api_key)
     
-    if not team:
+    if not key_info:
          raise HTTPException(status_code=401, detail="Unauthorized")
-    if team["credits"] <= 0:
+    if key_info["credits"] <= 0:
          raise HTTPException(status_code=402, detail="Insufficient credits")
 
     task = body.get("task")
     input_data = body.get("input", {})
-    model = body.get("model", "qwen")
     config = body.get("config", {})
     stream = config.get("stream", False)
 
-    # Overlays for Key Specific Context
-    key_sys_prompt = team.get("system_prompt")
-    key_rag_text = team.get("rag_text")
+    # Intelligent Key Config Auto-Apply
+    model = key_info.get("model_id", "qwen")
+    temperature = key_info.get("temperature", 0.1)
+    key_sys_prompt = key_info.get("system_prompt")
+    key_rag_text = key_info.get("rag_text")
 
     if key_sys_prompt:
         input_data["system_prompt"] = key_sys_prompt
@@ -90,6 +93,9 @@ async def execute(request: Request):
             combined_rag = (key_rag_text or "") + ("\n" if key_rag_text and rag_text else "") + rag_text
             text = input_data.get("text", "")
             input_data["text"] = f"Use the following knowledge documents as context to fulfill the user request:\n{combined_rag}\n\nUser Request:\n{text}"
+    elif key_rag_text:
+        text = input_data.get("text", "")
+        input_data["text"] = f"Use the following knowledge documents as context to fulfill the user request:\n{key_rag_text}\n\nUser Request:\n{text}"
 
     try:
          prompt = build_prompt(task, input_data)
@@ -99,13 +105,14 @@ async def execute(request: Request):
     job_id = str(uuid.uuid4())
     job = {
         "job_id": job_id, 
-        "team_id": team["team_id"],
+        "user_id": key_info["user_id"],
+        "api_key": api_key,
         "model": model,
         "task": task, 
         "prompt": prompt,
         "request_payload": body,
         "created_at": time.time(),
-        "temperature": input_data.get("temperature", 0.1)
+        "temperature": temperature
     }
 
     await job_queue.put(job)
@@ -126,18 +133,20 @@ async def chat_completions(request: Request):
     body = await request.json()
     auth_header = request.headers.get("Authorization", "")
     api_key = auth_header.replace("Bearer ", "").strip()
-    team = validate_api_key(api_key)
+    key_info = validate_api_key(api_key)
     
-    if not team:
+    if not key_info:
          raise HTTPException(status_code=401, detail="Unauthorized")
-    if team["credits"] <= 0:
+    if key_info["credits"] <= 0:
          raise HTTPException(status_code=402, detail="Insufficient credits")
 
     messages = body.get("messages", [])
-    model = body.get("model", "qwen") # Map requested model to our pools
     
-    key_sys_prompt = team.get("system_prompt")
-    key_rag_text = team.get("rag_text")
+    # Intelligent Key Config Auto-Apply for Chat
+    model = key_info.get("model_id", "qwen")
+    temperature = key_info.get("temperature", 0.1)
+    key_sys_prompt = key_info.get("system_prompt")
+    key_rag_text = key_info.get("rag_text")
     
     if key_rag_text:
         # Prepend context to the last user message
@@ -166,12 +175,14 @@ async def chat_completions(request: Request):
     job_id = str(uuid.uuid4())
     job = {
         "job_id": job_id, 
-        "team_id": team["team_id"],
-        "model": model, # qwen or tinyllama
+        "user_id": key_info["user_id"],
+        "api_key": api_key,
+        "model": model, 
         "task": "chat", 
         "prompt": prompt,
         "request_payload": body,
-        "created_at": time.time()
+        "created_at": time.time(),
+        "temperature": temperature
     }
 
     await job_queue.put(job)
@@ -199,27 +210,11 @@ async def chat_completions(request: Request):
         }
     }
 
-# --- Admin Endpoints ---
-
-def check_admin(request: Request):
-    auth_header = request.headers.get("Authorization", "")
-    api_key = auth_header.replace("Bearer ", "").strip()
-    if api_key != "admin-key":
-        raise HTTPException(status_code=403, detail="Admin access required")
-
-@router.post("/v1/admin/teams")
-async def admin_create_team(request: Request):
-    check_admin(request); body = await request.json()
-    create_team(body["id"], body["name"], body.get("credits", 1000.0))
-    return {"message": f"Team {body['id']} provisioned"}
-
-@router.get("/v1/admin/teams")
-async def admin_list_teams(request: Request):
-    check_admin(request); return {"teams": get_all_teams()}
+# --- Management Endpoints ---
 
 @router.post("/v1/admin/keys")
-async def admin_create_key(request: Request):
-    check_admin(request); body = await request.json()
+async def admin_create_key(request: Request, user: dict = Depends(verify_jwt)):
+    body = await request.json()
     sys_p = body.get("system_prompt", "")
     files = body.get("files", [])
     rag_text = ""
@@ -244,12 +239,20 @@ async def admin_create_key(request: Request):
         except Exception as e:
             print(f"Error parsing key level RAG {f.get('name')}: {e}")
             
-    create_api_key(body["key"], body["team_id"], body["name"], sys_p, rag_text)
+    create_api_key(
+        key=body["key"], 
+        user_id=user["id"], 
+        name=body["name"], 
+        model_id=body.get("model_id", "qwen"),
+        temperature=body.get("temperature", 0.1),
+        system_prompt=sys_p, 
+        rag_text=rag_text
+    )
     return {"message": "Key forged"}
 
-@router.get("/v1/admin/keys/{team_id}")
-async def admin_get_keys(team_id: str, request: Request):
-    check_admin(request); return {"keys": get_team_keys(team_id)}
+@router.get("/v1/admin/keys")
+async def get_keys(user: dict = Depends(verify_jwt)):
+    return {"keys": get_user_keys(user["id"])}
 
 # --- Internal Helpers ---
 

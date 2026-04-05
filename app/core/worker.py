@@ -33,7 +33,8 @@ async def process_job(job: Dict[str, Any]):
         # Persistent Metrics with full Request/Response and Prompt/Completion logging
         store_metrics(
             job_id=job["job_id"], 
-            team_id=job["team_id"], 
+            user_id=job["user_id"], 
+            api_key=job["api_key"],
             metrics=metrics,
             input_text=job["prompt"],
             output_text=output,
