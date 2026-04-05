@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro'
 import { authService } from '../lib/auth.ts'
-import { Key, Copy, Eye, BarChart3, Zap, Settings, X, Upload, Download } from 'lucide-astro'
+import { Key, Copy, Eye, BarChart3, Zap, Settings, X, Upload, Download, Trash } from 'lucide-astro'
 const isAuthenticated = authService.isAuthenticated()
 ---
 
@@ -46,7 +46,7 @@ const isAuthenticated = authService.isAuthenticated()
             <div class="text-sm text-gray-400 mb-1">Billing Tier</div>
             <div class="font-semibold text-green-400">Pro Fixed ($49/mo)</div>
           </div>
-          <button class="px-6 py-3 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 shadow-lg font-medium transition-all" onclick="document.getElementById('createKeyModal').classList.remove('hidden')">
+          <button id="forgeKeyBtn" class="px-6 py-3 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg hover:from-brand-purple/90 hover:to-brand-blue/90 shadow-lg font-medium transition-all relative overflow-hidden" onclick="forgeNewKey()">
             + Forge New Key
           </button>
         </div>
@@ -107,7 +107,7 @@ const isAuthenticated = authService.isAuthenticated()
 
         <div class="pt-4 border-t border-white/10 flex justify-end gap-3">
           <button type="button" class="px-5 py-2.5 text-gray-300 hover:text-white transition-colors" onclick="document.getElementById('createKeyModal').classList.add('hidden')">Cancel</button>
-          <button type="submit" id="submitKeyBtn" class="px-6 py-2.5 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg shadow-lg font-medium hover:opacity-90">Generate Key</button>
+          <button type="submit" id="submitKeyBtn" class="px-6 py-2.5 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-lg shadow-lg font-medium hover:opacity-90 relative overflow-hidden">Generate Key</button>
         </div>
       </form>
     </div>
@@ -152,7 +152,7 @@ const isAuthenticated = authService.isAuthenticated()
       }
       
       keysGrid.innerHTML = keys.map(k => `
-        <div class="glass-enhanced p-6 rounded-xl border border-white/10 hover:border-brand-purple/50 transition-all group">
+        <div class="glass-enhanced p-6 rounded-xl border border-white/10 hover:border-brand-purple/50 transition-all group" data-key-id="${k.key}">
           <div class="flex flex-col md:flex-row justify-between md:items-start gap-4 mb-4">
             <div>
               <div class="flex items-center gap-3 mb-1">
@@ -165,6 +165,14 @@ const isAuthenticated = authService.isAuthenticated()
             </div>
             <div class="flex justify-end md:justify-start gap-4">
               <button class="px-4 py-1.5 glass rounded border border-white/10 text-sm text-gray-300 hover:text-white transition-colors flex items-center gap-2 min-w-[140px] overflow-hidden" onclick="showLogsModal('${k.key}')"><Eye class="w-4 h-4 flex-shrink-0" /> <span class="truncate">View Logs & Usage</span></button>
+              <button class="p-1.5 glass rounded border border-red-500/30 text-red-400 hover:text-red-300 hover:border-red-500/50 transition-all hover:scale-110 relative" onclick="deleteKey('${k.key}', this)" title="Delete Key">
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+    <path d="M3 6h18"></path>
+    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+    <line x1="10" y1="11" x2="10" y2="17"></line>
+    <line x1="14" y1="11" x2="14" y2="17"></line>
+  </svg>
+</button>
             </div>
           </div>
           
@@ -203,8 +211,10 @@ const isAuthenticated = authService.isAuthenticated()
         const btn = document.getElementById('submitKeyBtn');
         const errDiv = document.getElementById('formError');
         
+        // Trigger Game of Thrones generate animation
+        generateKeyWithAnimation();
+        
         btn.disabled = true;
-        btn.textContent = 'Generating...';
         errDiv.classList.add('hidden');
         
         // Random UUID equivalent
@@ -227,9 +237,12 @@ const isAuthenticated = authService.isAuthenticated()
           });
           
           if (res.ok) {
-            document.getElementById('createKeyModal').classList.add('hidden');
-            loadKeys();
-            createForm.reset();
+            // Wait for animation to complete before closing modal
+            setTimeout(() => {
+              document.getElementById('createKeyModal').classList.add('hidden');
+              loadKeys();
+              createForm.reset();
+            }, 2500); // Match the generate animation duration
           } else {
             errDiv.textContent = 'Failed to create key. Ensure API is running.';
             errDiv.classList.remove('hidden');
@@ -399,9 +412,162 @@ const isAuthenticated = authService.isAuthenticated()
       }
     }
 
+    // Game of Thrones Animations
+    function forgeNewKey() {
+      const forgeBtn = document.getElementById('forgeKeyBtn');
+      const modal = document.getElementById('createKeyModal');
+      
+      // Add fire animation to button
+      forgeBtn.classList.add('forge-animation');
+      
+      // Create smoke effect
+      const smoke = document.createElement('div');
+      smoke.className = 'smoke-effect';
+      smoke.style.background = 'radial-gradient(circle, rgba(255, 69, 0, 0.3) 0%, rgba(255, 140, 0, 0.2) 50%, transparent 100%)';
+      forgeBtn.appendChild(smoke);
+      
+      // Play dragon sound effect (simulated with visual feedback)
+      forgeBtn.style.transform = 'scale(1.1)';
+      
+      setTimeout(() => {
+        forgeBtn.classList.remove('forge-animation');
+        forgeBtn.style.transform = 'scale(1)';
+        if (smoke.parentNode) {
+          smoke.remove();
+        }
+        modal.classList.remove('hidden');
+      }, 2000);
+    }
+    
+    function saveKeyWithAnimation() {
+      const submitBtn = document.getElementById('submitKeyBtn');
+      
+      // Add ice animation to button
+      submitBtn.classList.add('save-animation');
+      
+      // Create frost effect
+      const frost = document.createElement('div');
+      frost.className = 'frost-effect';
+      frost.style.background = 'radial-gradient(circle, rgba(135, 206, 235, 0.3) 0%, rgba(100, 149, 237, 0.2) 50%, transparent 100%)';
+      submitBtn.appendChild(frost);
+      
+      // Change button text temporarily
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '❄️ Forging...';
+      
+      setTimeout(() => {
+        submitBtn.classList.remove('save-animation');
+        submitBtn.innerHTML = '✨ Forged!';
+        if (frost.parentNode) {
+          frost.remove();
+        }
+        
+        setTimeout(() => {
+          submitBtn.innerHTML = originalText;
+        }, 1000);
+      }, 2000);
+    }
+    
+    function generateKeyWithAnimation() {
+      const submitBtn = document.getElementById('submitKeyBtn');
+      
+      // Add thunder lightning animation to button
+      submitBtn.classList.add('generate-animation');
+      
+      // Create lightning effect
+      const lightning = document.createElement('div');
+      lightning.className = 'shadow-smoke-effect';
+      lightning.style.background = 'radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(147, 112, 219, 0.3) 50%, rgba(75, 0, 130, 0.2) 100%)';
+      submitBtn.appendChild(lightning);
+      
+      // Change button text temporarily
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '⚡ Generating...';
+      
+      setTimeout(() => {
+        submitBtn.classList.remove('generate-animation');
+        submitBtn.innerHTML = '🔮 Generated!';
+        if (lightning.parentNode) {
+          lightning.remove();
+        }
+        
+        setTimeout(() => {
+          submitBtn.innerHTML = originalText;
+        }, 1000);
+      }, 2500);
+    }
+    
+    function deleteKey(keyId, buttonElement) {
+      console.log('Attempting to delete key:', keyId); // Debug log
+      
+      // Add shadow banish animation to button
+      buttonElement.classList.add('delete-animation');
+      
+      // Create shadow smoke effect
+      const shadowSmoke = document.createElement('div');
+      shadowSmoke.className = 'shadow-smoke-effect';
+      shadowSmoke.style.background = 'radial-gradient(circle, rgba(75, 0, 130, 0.3) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%)';
+      buttonElement.appendChild(shadowSmoke);
+      
+      // Change button icon temporarily
+      const originalContent = buttonElement.innerHTML;
+      buttonElement.innerHTML = '🌑';
+      
+      // Immediately attempt to delete the key
+      authService.fetchWithAuth(`http://localhost:8000/v1/admin/keys/${encodeURIComponent(keyId)}`, {
+        method: 'DELETE'
+      }).then(res => {
+        console.log('Delete response status:', res.status); // Debug log
+        if (res.ok) {
+          console.log('Key deleted successfully'); // Debug log
+          // Success - proceed with animation
+          setTimeout(() => {
+            // Remove the key card with animation
+            const keyCard = buttonElement.closest('.glass-enhanced');
+            if (keyCard) {
+              keyCard.style.transition = 'all 0.5s ease-out';
+              keyCard.style.transform = 'scale(0.8)';
+              keyCard.style.opacity = '0.5';
+              
+              setTimeout(() => {
+                keyCard.style.transform = 'scale(0)';
+                keyCard.style.opacity = '0';
+                
+                setTimeout(() => {
+                  loadKeys(); // Reload the keys list
+                }, 500);
+              }, 500);
+            }
+          }, 1000); // Wait for initial animation
+        } else {
+          console.log('Delete failed, response:', res); // Debug log
+          // Failed to delete - restore button
+          buttonElement.classList.remove('delete-animation');
+          buttonElement.innerHTML = originalContent;
+          if (shadowSmoke.parentNode) {
+            shadowSmoke.remove();
+          }
+          alert(`Failed to delete key. Status: ${res.status}. Please try again.`);
+        }
+      }).catch(err => {
+        console.error('Failed to delete key:', err); // Debug log
+        // Restore button on error
+        buttonElement.classList.remove('delete-animation');
+        buttonElement.innerHTML = originalContent;
+        if (shadowSmoke.parentNode) {
+          shadowSmoke.remove();
+        }
+        alert(`Network error while deleting key: ${err.message}`);
+      });
+    }
+
     // Make functions globally accessible
     window.showLogsModal = showLogsModal;
     window.toggleJsonSection = toggleJsonSection;
+    window.forgeNewKey = forgeNewKey;
+    window.saveKeyWithAnimation = saveKeyWithAnimation;
+    window.generateKeyWithAnimation = generateKeyWithAnimation;
+    window.deleteKey = deleteKey;
   </script>
 
   <!-- Logs Modal -->

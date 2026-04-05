@@ -198,7 +198,7 @@ def deactivate_api_key(key: str):
 def get_user_keys(user_id: str) -> List[Dict[str, Any]]:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT key, name, model_id, temperature, active, system_prompt, rag_text FROM api_keys WHERE user_id = ?", (user_id,))
+    cursor.execute("SELECT key, name, model_id, temperature, active, system_prompt, rag_text FROM api_keys WHERE user_id = ? AND active = 1", (user_id,))
     keys = [{"key": r[0], "name": r[1], "model_id": r[2], "temperature": r[3], "active": bool(r[4]), "system_prompt": r[5] or "", "has_rag": bool(r[6])} for r in cursor.fetchall()]
     conn.close()
     return keys

@@ -11,7 +11,8 @@ from fastapi.responses import StreamingResponse
 from ..core.worker import job_queue, results
 from ..data.manager import (
     get_all_job_ids, get_job_metrics, validate_api_key,
-    create_api_key, get_user_keys, get_metrics_by_key
+    create_api_key, get_user_keys, get_metrics_by_key,
+    deactivate_api_key
 )
 from ..utils.helpers import sse, chunk_text
 from ..services.builder import build_prompt
@@ -253,6 +254,21 @@ async def admin_create_key(request: Request, user: dict = Depends(verify_jwt)):
 @router.get("/v1/admin/keys")
 async def get_keys(user: dict = Depends(verify_jwt)):
     return {"keys": get_user_keys(user["id"])}
+
+@router.delete("/v1/admin/keys/{api_key}")
+async def admin_delete_key(api_key: str, user: dict = Depends(verify_jwt)):
+    # First verify the key belongs to the user
+    user_keys = get_user_keys(user["id"])
+    key_exists = any(k["key"] == api_key for k in user_keys)
+    
+    if not key_exists:
+        raise HTTPException(status_code=404, detail="Key not found or doesn't belong to user")
+    
+    try:
+        deactivate_api_key(api_key)
+        return {"message": "Key deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete key: {str(e)}")
 
 # --- Internal Helpers ---
 
