@@ -1,6 +1,10 @@
 import time
 import asyncio
 import uuid
+import base64
+import io
+import pypdf
+import docx
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import StreamingResponse
 from typing import Dict, Any
@@ -49,6 +53,44 @@ async def execute(request: Request):
     config = body.get("config", {})
     stream = config.get("stream", False)
 
+    # Overlays for Key Specific Context
+    key_sys_prompt = team.get("system_prompt")
+    key_rag_text = team.get("rag_text")
+
+    if key_sys_prompt:
+        input_data["system_prompt"] = key_sys_prompt
+
+    # Process Knowledge Grounding (RAG Files)
+    files = input_data.get("files", [])
+    if files:
+        rag_text = ""
+        for f in files:
+            try:
+                fname = f.get("name", "")
+                fdata = base64.b64decode(f.get("data", ""))
+                parsed_text = ""
+                if fname.lower().endswith(".pdf"):
+                    reader = pypdf.PdfReader(io.BytesIO(fdata))
+                    for page in reader.pages:
+                        if page.extract_text():
+                            parsed_text += page.extract_text() + "\n"
+                elif fname.lower().endswith(".docx"):
+                    doc = docx.Document(io.BytesIO(fdata))
+                    for para in doc.paragraphs:
+                        parsed_text += para.text + "\n"
+                elif fname.lower().endswith(".txt"):
+                    parsed_text = fdata.decode("utf-8")
+                
+                if parsed_text:
+                    rag_text += f"\n--- Knowledge Document: {fname} ---\n{parsed_text}\n"
+            except Exception as e:
+                print(f"Error parsing RAG file {f.get('name')}: {e}")
+                
+        if rag_text or key_rag_text:
+            combined_rag = (key_rag_text or "") + ("\n" if key_rag_text and rag_text else "") + rag_text
+            text = input_data.get("text", "")
+            input_data["text"] = f"Use the following knowledge documents as context to fulfill the user request:\n{combined_rag}\n\nUser Request:\n{text}"
+
     try:
          prompt = build_prompt(task, input_data)
     except ValueError as e:
@@ -62,7 +104,8 @@ async def execute(request: Request):
         "task": task, 
         "prompt": prompt,
         "request_payload": body,
-        "created_at": time.time()
+        "created_at": time.time(),
+        "temperature": input_data.get("temperature", 0.1)
     }
 
     await job_queue.put(job)
@@ -92,6 +135,27 @@ async def chat_completions(request: Request):
 
     messages = body.get("messages", [])
     model = body.get("model", "qwen") # Map requested model to our pools
+    
+    key_sys_prompt = team.get("system_prompt")
+    key_rag_text = team.get("rag_text")
+    
+    if key_rag_text:
+        # Prepend context to the last user message
+        for msg in reversed(messages):
+            if msg.get("role") == "user":
+                msg["content"] = f"Use the following knowledge documents as context to fulfill the user request:\n{key_rag_text}\n\nUser Request:\n{msg['content']}"
+                break
+                
+    if key_sys_prompt:
+        # Append or modify system instructions
+        has_sys = False
+        for msg in messages:
+            if msg.get("role") == "system":
+                msg["content"] = key_sys_prompt
+                has_sys = True
+                break
+        if not has_sys:
+            messages.insert(0, {"role": "system", "content": key_sys_prompt})
     
     # Map messages to our internal ChatTask
     try:
@@ -156,7 +220,31 @@ async def admin_list_teams(request: Request):
 @router.post("/v1/admin/keys")
 async def admin_create_key(request: Request):
     check_admin(request); body = await request.json()
-    create_api_key(body["key"], body["team_id"], body["name"])
+    sys_p = body.get("system_prompt", "")
+    files = body.get("files", [])
+    rag_text = ""
+    for f in files:
+        try:
+            fname = f.get("name", "")
+            fdata = base64.b64decode(f.get("data", ""))
+            parsed_text = ""
+            if fname.lower().endswith(".pdf"):
+                reader = pypdf.PdfReader(io.BytesIO(fdata))
+                for page in reader.pages:
+                    if page.extract_text():
+                        parsed_text += page.extract_text() + "\n"
+            elif fname.lower().endswith(".docx"):
+                doc = docx.Document(io.BytesIO(fdata))
+                for para in doc.paragraphs:
+                    parsed_text += para.text + "\n"
+            elif fname.lower().endswith(".txt"):
+                parsed_text = fdata.decode("utf-8")
+            if parsed_text:
+                rag_text += f"\n--- Knowledge Document: {fname} ---\n{parsed_text}\n"
+        except Exception as e:
+            print(f"Error parsing key level RAG {f.get('name')}: {e}")
+            
+    create_api_key(body["key"], body["team_id"], body["name"], sys_p, rag_text)
     return {"message": "Key forged"}
 
 @router.get("/v1/admin/keys/{team_id}")

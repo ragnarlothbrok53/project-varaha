@@ -45,6 +45,8 @@ def init_db():
             key TEXT PRIMARY KEY,
             team_id TEXT,
             name TEXT,
+            system_prompt TEXT,
+            rag_text TEXT,
             active INTEGER DEFAULT 1,
             FOREIGN KEY(team_id) REFERENCES teams(id)
         )
@@ -52,7 +54,7 @@ def init_db():
     
     # Default data
     cursor.execute("INSERT OR IGNORE INTO teams (id, name, credits) VALUES ('system', 'System Team', 999999.0)")
-    cursor.execute("INSERT OR IGNORE INTO api_keys (key, team_id, name) VALUES ('admin-key', 'system', 'Default Admin')")
+    cursor.execute("INSERT OR IGNORE INTO api_keys (key, team_id, name, system_prompt, rag_text) VALUES ('admin-key', 'system', 'Default Admin', '', '')")
     
     conn.commit()
     conn.close()
@@ -100,7 +102,7 @@ def validate_api_key(key: str) -> Dict[str, Any]:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT teams.id, teams.name, teams.credits 
+        SELECT teams.id, teams.name, teams.credits, api_keys.system_prompt, api_keys.rag_text
         FROM api_keys 
         JOIN teams ON api_keys.team_id = teams.id 
         WHERE api_keys.key = ? AND api_keys.active = 1
@@ -108,7 +110,7 @@ def validate_api_key(key: str) -> Dict[str, Any]:
     row = cursor.fetchone()
     conn.close()
     if row:
-        return {"team_id": row[0], "team_name": row[1], "credits": row[2]}
+        return {"team_id": row[0], "team_name": row[1], "credits": row[2], "system_prompt": row[3], "rag_text": row[4]}
     return {}
 
 def get_job_metrics(job_id: str) -> Dict[str, Any]:
@@ -161,10 +163,10 @@ def get_all_teams() -> List[Dict[str, Any]]:
     conn.close()
     return teams
 
-def create_api_key(key: str, team_id: str, name: str):
+def create_api_key(key: str, team_id: str, name: str, system_prompt: str = "", rag_text: str = ""):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO api_keys (key, team_id, name) VALUES (?, ?, ?)", (key, team_id, name))
+    cursor.execute("INSERT INTO api_keys (key, team_id, name, system_prompt, rag_text) VALUES (?, ?, ?, ?, ?)", (key, team_id, name, system_prompt, rag_text))
     conn.commit()
     conn.close()
 
@@ -178,7 +180,7 @@ def deactivate_api_key(key: str):
 def get_team_keys(team_id: str) -> List[Dict[str, Any]]:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT key, name, active FROM api_keys WHERE team_id = ?", (team_id,))
-    keys = [{"key": r[0], "name": r[1], "active": bool(r[2])} for r in cursor.fetchall()]
+    cursor.execute("SELECT key, name, active, system_prompt, rag_text FROM api_keys WHERE team_id = ?", (team_id,))
+    keys = [{"key": r[0], "name": r[1], "active": bool(r[2]), "system_prompt": r[3] or "", "has_rag": bool(r[4])} for r in cursor.fetchall()]
     conn.close()
     return keys

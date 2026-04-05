@@ -59,7 +59,10 @@ async def init_all_pools():
     if os.path.exists(MODELS["tinyllama"]):
         await init_model_pool("tinyllama", pool_size=1)
 
-def generate_on_engine(engine: Llama, p: str, model_id: str) -> Dict[str, Any]:
+def generate_on_engine(engine: Llama, req: Dict[str, Any], model_id: str) -> Dict[str, Any]:
+    p = req["prompt"]
+    temperature = float(req.get("temperature", 0.1))
+    
     # Handle pre-filled response prefixes (specific to Qwen/Instruct models)
     is_json_prefilled = p.endswith("<|im_start|>assistant\n{")
     
@@ -75,7 +78,7 @@ def generate_on_engine(engine: Llama, p: str, model_id: str) -> Dict[str, Any]:
         prompt=p,
         max_tokens=MAX_OUTPUT_TOKENS,
         stop=stop_tokens,
-        temperature=0.1,
+        temperature=temperature,
         repeat_penalty=1.1,
         stream=True,
     )
@@ -103,7 +106,7 @@ def generate_on_engine(engine: Llama, p: str, model_id: str) -> Dict[str, Any]:
         },
     }
 
-async def llm_batch_on_model(prompts: List[str], model_id: str = "qwen"):
+async def llm_batch_on_model(requests: List[Dict[str, Any]], model_id: str = "qwen"):
     """Parallel batching via an engine pool for a specific model."""
     if model_id not in _initialized_models:
         await init_model_pool(model_id)
@@ -112,11 +115,11 @@ async def llm_batch_on_model(prompts: List[str], model_id: str = "qwen"):
     if not queue:
         raise RuntimeError(f"Engine pool for {model_id} failed to initialize.")
 
-    async def pooled_generate(p: str):
+    async def pooled_generate(r: Dict[str, Any]):
         engine = await queue.get()
         try:
-            return await asyncio.to_thread(generate_on_engine, engine, p, model_id)
+            return await asyncio.to_thread(generate_on_engine, engine, r, model_id)
         finally:
             await queue.put(engine)
             
-    return await asyncio.gather(*(pooled_generate(p) for p in prompts))
+    return await asyncio.gather(*(pooled_generate(r) for r in requests))

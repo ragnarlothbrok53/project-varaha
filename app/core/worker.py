@@ -18,7 +18,8 @@ async def process_job(job: Dict[str, Any]):
     """Process an individual job asynchronously via the specific model pool."""
     try:
         model_id = job.get("model", "qwen")
-        res = await llm_batch_on_model([job["prompt"]], model_id=model_id)
+        req = {"prompt": job["prompt"], "temperature": job.get("temperature", 0.1)}
+        res = await llm_batch_on_model([req], model_id=model_id)
         result_data = res[0]
         
         output = result_data["output"]

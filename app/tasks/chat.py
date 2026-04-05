@@ -6,10 +6,18 @@ class ChatTask(LLMTask):
     name: str = "chat"
 
     def build_prompt(self, payload: Dict[str, Any]) -> str:
-        """Construct a ChatML prompt from a list of messages."""
-        messages = payload.get("messages", [])
-        prompt = ""
+        """Construct a ChatML prompt from a list of messages or a direct text injection."""
+        messages = payload.get("messages")
         
+        if messages is None:
+            # Handle native UI flow (proxy sandbox)
+            sys_msg = payload.get("system_prompt")
+            if not sys_msg:
+                sys_msg = "You are Varaha, a high-performance AI assistant."
+            user_text = payload.get("text", "")
+            return f"<|im_start|>system\n{sys_msg}<|im_end|>\n<|im_start|>user\n{user_text}<|im_end|>\n<|im_start|>assistant\n"
+        
+        prompt = ""
         # System message handling
         system_msg = next((m.get("content") for m in messages if m.get("role") == "system"), 
                         "You are Varaha, a high-performance AI assistant.")
