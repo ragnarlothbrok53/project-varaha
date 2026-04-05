@@ -51,7 +51,7 @@ async def get_key_requests(api_key: str, user: dict = Depends(verify_jwt), reque
     # Note: For production, we should enforce that api_key belongs to user["id"]
     return {"requests": get_metrics_by_key(api_key)}
 
-@router.post("/v1/execute", response_model=ExecuteResponse)
+@router.post("/v1/execute")
 @limiter.limit(f"{settings.rate_limit_requests}/{settings.rate_limit_window}minute")
 async def execute(execute_request: ExecuteRequest, request: Request):
     auth_header = request.headers.get("Authorization", "")
@@ -63,9 +63,9 @@ async def execute(execute_request: ExecuteRequest, request: Request):
     if key_info["credits"] <= 0:
          raise HTTPException(status_code=402, detail="Insufficient credits")
 
-    task = body.get("task")
-    input_data = body.get("input", {})
-    config = body.get("config", {})
+    task = execute_request.task
+    input_data = execute_request.input
+    config = execute_request.config or {}
     stream = config.get("stream", False)
 
     # Intelligent Key Config Auto-Apply
@@ -114,7 +114,7 @@ async def execute(execute_request: ExecuteRequest, request: Request):
     try:
          prompt = build_prompt(task, input_data)
     except ValueError as e:
-         raise HTTPException(400, str(e))
+         raise HTTPException(status_code=400, detail=str(e))
 
     job_id = str(uuid.uuid4())
     job = {
@@ -124,7 +124,7 @@ async def execute(execute_request: ExecuteRequest, request: Request):
         "model": model,
         "task": task, 
         "prompt": prompt,
-        "request_payload": body,
+        "request_payload": execute_request.dict(),
         "created_at": time.time(),
         "temperature": temperature
     }
@@ -184,7 +184,7 @@ async def chat_completions(request: Request):
     try:
         prompt = build_prompt("chat", {"messages": messages})
     except Exception as e:
-        raise HTTPException(400, f"Prompt Construction Error: {e}")
+        raise HTTPException(status_code=400, detail=f"Prompt Construction Error: {e}")
 
     job_id = str(uuid.uuid4())
     job = {
@@ -204,7 +204,7 @@ async def chat_completions(request: Request):
     # Wait for result and format as OpenAI JSON
     res_dict = await wait_for_result(job_id)
     if not res_dict:
-        raise HTTPException(500, "Inference node timeout")
+        raise HTTPException(status_code=500, detail="Inference node timeout")
         
     m = res_dict["metrics"]
     return {
@@ -319,7 +319,7 @@ async def admin_delete_key(api_key: str, user: dict = Depends(verify_jwt)):
 
 # --- Internal Helpers ---
 
-async def wait_for_result(job_id: str, timeout: float = 30.0):
+async def wait_for_result(job_id: str, timeout: float = 60.0):
     start = time.time()
     while time.time() - start < timeout:
         if job_id in results:

@@ -224,3 +224,10 @@ def get_user_by_email(email: str) -> Dict[str, Any]:
     if row:
         return {"id": row[0], "email": row[1], "password_hash": row[2], "name": row[3], "credits": row[4]}
     return {}
+
+def update_user_password(user_id: str, password_hash: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET password_hash = ? WHERE id = ?", (password_hash, user_id))
+    conn.commit()
+    conn.close()

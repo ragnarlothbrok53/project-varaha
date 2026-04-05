@@ -2,6 +2,8 @@
 
 # Configuration
 PORT=${1:-8000}
+# Cleaning environment
+pkill -f "uvicorn|project-varaha|8000" || true
 
 # 🔍 Pre-flight check: Model exists?
 if [ ! -d "models" ] || [ -z "$(ls models/*.gguf 2>/dev/null)" ]; then

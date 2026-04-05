@@ -3,12 +3,13 @@ import asyncio
 import time
 from typing import List, Dict, Any, Optional
 from llama_cpp import Llama
-from ..utils.config import MAX_OUTPUT_TOKENS
+from ..utils.config import get_settings
 
 # Dictionary of Engine Pools for different models
 _engine_pools: Dict[str, asyncio.Queue] = {}
 _initialized_models: set = set()
 
+settings = get_settings()
 # Model Definitions
 MODELS = {
     "qwen": "models/qwen2.5-1.5b-instruct-q4_0.gguf",
@@ -76,7 +77,7 @@ def generate_on_engine(engine: Llama, req: Dict[str, Any], model_id: str) -> Dic
 
     stream = engine.create_completion(
         prompt=p,
-        max_tokens=MAX_OUTPUT_TOKENS,
+        max_tokens=settings.MAX_OUTPUT_TOKENS,
         stop=stop_tokens,
         temperature=temperature,
         repeat_penalty=1.1,
